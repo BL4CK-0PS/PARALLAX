@@ -150,3 +150,40 @@ To work without blocking each other, P1 and P2 communicate strictly through the 
 | **4-Min Video Walkthrough** | **P2 (Lead)** + P1 | Script: 0:00 Problem -> 0:30 Live Flow -> 1:30 Injected Failure & Blocked Exfil -> 2:30 Human Gate Approval -> 3:30 Replayable Timeline & Architecture. |
 | **Public GitHub Repo** | **P1 & P2** | Public repo with clean commits, complete README, and reproducible test commands. |
 | **Devnovate Submission** | **P1** | Complete registration form, submit Drive link, YouTube link, and repo URL before 24 Nov 6:00 PM. |
+
+---
+
+## Demo-readiness actions (from `parallax/docs/submission/WINNING_RULES.md`, added 2026-11-23)
+
+The pitch now leads with **Guard** and a measured before/after. These items make the live demo match the slides.
+
+**P1 (done):**
+- [x] Guard reads the page, not the agent: `Action.dom` (`DomFacts` in `src/core/types.ts`). Pay/Delete buttons are gated by their real text; password/OTP/card boxes are caught by `type`/`autocomplete`; link `href` and form `action` are allowlisted; a CLICK with no DOM facts fails closed (asks the user).
+- [x] `npm run eval`: 14 attacks + 8 normal steps, before vs after → `docs/submission/BEFORE_AFTER.md`. Currently 14/14 → 0/14, 0 normal steps blocked.
+
+**P2 (needed for the live demo):**
+- [ ] `src/capture/browser.ts`: before every CLICK/TYPE/SUBMIT, read `DomFacts` from the live element (`locator.evaluate`: tagName, innerText, aria-label, type, name, autocomplete, resolved `href`, enclosing `form.action`) and set `action.dom`. Without this, every click asks for approval.
+- [ ] `demo-app/pages`: hide the injection payload from humans (like the Comet spoiler-tag attack) and add a "reveal hidden text" toggle for the demo moment. Add a fee **Pay** button so the spoofed-label attack can be shown live.
+- [ ] `ui/`: demo order = injection blocked → approval gate → diagnosis → replay. Show the before/after numbers from `data/eval/before-after.json`.
+- [ ] YouTube video (3–5 min) follows deck slide 3's user flow, core feature in the first 2 minutes.
+
+**Both:** never show a number that isn't sourced or produced by `npm run eval`.
+
+### MUST vs NICE (cut NICE first if time runs short)
+**MUST (the demo dies without these):**
+1. One unbroken run in the Command Center: injection blocked → final-submit approval → session expiry diagnosed → verified → replay.
+2. `/playground` working (done: 14 → 0 counter, try-it boxes).
+3. Demo video recorded and uploaded (see `parallax/docs/submission/DEMO_VIDEO_SCRIPT.md`).
+4. Deck, repo and video links submitted on Devnovate.
+
+**NICE (only after MUST is done):** live Playwright capture with `action.dom`, hidden-text reveal toggle, live Pay button, real GHOST probing beyond the session check, MIRROR simulation.
+
+**Fallback if Playwright isn't stable:** record the scripted run + playground and say plainly that the agent path is scripted. Don't burn the evening on it.
+
+### Submission checklist (internal deadline 24 Nov, 20:00 IST; official 23:59 IST)
+- [ ] USNs (register numbers) on deck slide 1, then rebuild: `python parallax/docs/submission/deck/build_deck.py given/wHACKiest26_ppt.pptx BL4CK_0P_Track2.pptx`
+- [ ] Deck on Google Drive, "Anyone with the link can view", opened in a logged-out browser
+- [ ] GitHub repo public; `given/ticket-whackiest.png` NOT committed; no `.env`
+- [ ] `npm test` and `npm run eval` green on a fresh clone
+- [ ] YouTube video unlisted, 3–5 min, plays logged-out
+- [ ] All three links pasted into Devnovate and submitted. Screenshot the confirmation.

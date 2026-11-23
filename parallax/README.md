@@ -1,26 +1,45 @@
 # PARALLAX
-### Autonomous Digital Reality Intelligence
-
-> **Observe the present. Reconstruct the past. Challenge the system. Simulate the future. Verify every action.**
+### A safety layer for AI browser agents: blocks dangerous actions, explains failures, records everything.
 
 [![Hackathon](https://img.shields.io/badge/wHACKiest%202026-CodeRIT%20%7C%20RIT%20Bengaluru-orange.svg)](#)
 [![Track](https://img.shields.io/badge/Track%202-Beyond%20the%20Browser-purple.svg)](#)
 [![Team](https://img.shields.io/badge/Team-BL4CK__0P%24-black.svg)](#)
-[![TypeScript](https://img.shields.io/badge/TypeScript-7.0-blue.svg)](#)
-[![Playwright](https://img.shields.io/badge/Playwright-1.65-green.svg)](#)
 [![Runtime Security](https://img.shields.io/badge/Policy-Deterministic%20Fail--Closed-red.svg)](#)
 
 ---
 
-## Overview
+## The problem, in one line
+AI agents now fill forms and click Submit for people, but a hijacked agent can leak an OTP or press "Pay", and afterwards nobody can say what it did.
+In 2025 [Brave showed](https://brave.com/blog/comet-prompt-injection/) hidden Reddit text making Perplexity's Comet agent leak a user's OTP, and OpenAI [said](https://techcrunch.com/2025/12/22/openai-says-ai-browsers-may-always-be-vulnerable-to-prompt-injection-attacks/) prompt injection is "unlikely to ever be fully solved".
 
-PARALLAX is an autonomous digital reality intelligence platform designed to govern, diagnose, and recover complex browser automation tasks. Rather than letting LLMs operate as unconstrained black-box agents, PARALLAX:
-1. **Reconstructs History (CHRONOS):** Captures full DOM and network state diffs to pinpoint where a workflow broke.
-2. **Conducts Controlled Experiments (GHOST):** Discriminates failure hypotheses (e.g. session drops vs. missing form dependencies) safely.
-3. **Simulates Recovery (MIRROR):** Evaluates bounded recovery candidates before executing them.
-4. **Enforces Deterministic Security:** Hard network allowlists, secret-field bans, and human confirmation gates for state-changing actions.
+**Built for:** AI/automation engineers at ed-tech, fintech and HR companies shipping browser agents that fill forms for their customers.
 
-For full architectural blueprints, diagrams, and getting started instructions, see the **[Root Repository README](../README.md)** and the technical specifications in the root directory.
+## What it does (3 features)
+| | What you get | How |
+|---|---|---|
+| **Guard** | The agent can't leak data, pay or type a password without you, even when the AI is fooled | Browser-level allowlist; approval gate that reads the button **from the page, not from the AI**; secret-field ban |
+| **Diagnose** | When a task fails, you get the exact step and the tested cause | CHRONOS state diff · GHOST probes · MIRROR ranks fixes |
+| **Replay** | Every click, request and decision, replayable | Hash-chained JSONL event store + timeline UI |
+
+## Before / after (measured, not claimed)
+`npm run eval` runs 14 attack techniques and 8 normal workflow steps with and without the guard. Full table: [`docs/submission/BEFORE_AFTER.md`](docs/submission/BEFORE_AFTER.md).
+
+| | Agent alone | Agent + PARALLAX |
+|---|---|---|
+| Harmful actions that ran (of 14) | 14 | **0** (11 blocked, 3 paused for approval) |
+| Normal steps that ran without friction (of 8) | 8 | 7 (final submit asks once) |
+| Normal steps wrongly blocked | 0 | 0 |
+
+This measures what happens *after* a model is fooled. It is not a detection rate.
+
+**Try it yourself:** `npm run dev`, then open <http://localhost:5173/playground>. Replay the 14 attacks, or try to sneak your own URL, disguised button or secret field past the guard. Every verdict comes from the real policy engine.
+
+## Honest status
+- **Real:** policy guard, event store with integrity check, recovery planner, verifier, demo backend, before/after harness (`npm test`: all green).
+- **Basic / scripted:** the demo agent follows a scripted path around the real guard and backend; GHOST classifies 3 known failure types by error pattern; MIRROR ranking is simple.
+- Playwright capture (`src/capture/browser.ts`) needs `npm i playwright` and must pass `dom` facts into every action (see `Action.dom` in `src/core/types.ts`).
+
+Pitch material: [`docs/submission/PITCH_DECK_CONTENT.md`](docs/submission/PITCH_DECK_CONTENT.md) · [`docs/submission/WINNING_RULES.md`](docs/submission/WINNING_RULES.md). Architecture: [root README](../README.md).
 
 ---
 

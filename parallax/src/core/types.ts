@@ -41,13 +41,30 @@ export type ActionType =
   | 'SUBMIT'
   | 'REAUTHENTICATE';
 
+/**
+ * Facts about the target element, read from the live DOM by the capture layer
+ * (never written by the model). The guard trusts these over the agent's own label.
+ */
+export interface DomFacts {
+  tagName: string;            // 'button', 'a', 'input', ...
+  text?: string;              // visible text content
+  ariaLabel?: string;
+  inputType?: string;         // input[type], e.g. 'password', 'submit'
+  name?: string;              // name / id attribute
+  autocomplete?: string;      // e.g. 'one-time-code', 'cc-number'
+  value?: string;             // value attribute of buttons/inputs
+  href?: string;              // resolved href for links
+  formAction?: string;        // resolved action URL of the enclosing form
+}
+
 export interface Action {
   id: string;
   type: ActionType;
   target: string;
   value?: string;
   isStateChanging: boolean;
-  humanLabel: string;
+  humanLabel: string;            // proposed by the agent: untrusted, display only
+  dom?: DomFacts;                // grounded facts from the browser: trusted
   metadata?: Record<string, unknown>;
 }
 

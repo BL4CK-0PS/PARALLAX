@@ -1,4 +1,7 @@
-import type { Action, PolicyDecision, PolicyLedgerEntry, PolicyStatus } from '../core/types.ts';
+import type { Action, DomFacts, PolicyDecision, PolicyLedgerEntry, PolicyStatus } from '../core/types.ts';
+
+/** autocomplete tokens that mark credential, OTP or card inputs (HTML spec). */
+const SECRET_AUTOCOMPLETE = ['current-password', 'new-password', 'one-time-code', 'cc-number', 'cc-csc', 'cc-exp'];
 
 export interface GuardConfig {
   allowedHosts: string[];
@@ -62,6 +65,12 @@ export class DeterministicPolicyGuard {
   public evaluateNetworkRequest(urlStr: string): { allowed: boolean; reason: string } {
     try {
       const parsed = new URL(urlStr);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return {
+          allowed: false,
+          reason: `URL scheme '${parsed.protocol}' rejected: only http and https may leave the browser.`
+        };
+      }
       const host = parsed.hostname.toLowerCase();
 
       const isAllowed = this.config.allowedHosts.some((allowed) => {
@@ -93,19 +102,55 @@ export class DeterministicPolicyGuard {
   }
 
   /**
-   * Detects if an action modifies external state or performs an irreversible operation.
+   * Checks the element the browser actually resolved, so an opaque selector like
+   * '#field-3' cannot hide a password or OTP box from the guard.
    */
-  public isStateChangingAction(action: Action): boolean {
+  public isSecretDomElement(dom?: DomFacts): boolean {
+    if (!dom) return false;
+    if (dom.inputType?.toLowerCase() === 'password') return true;
+    const autocomplete = dom.autocomplete?.toLowerCase() ?? '';
+    if (SECRET_AUTOCOMPLETE.some((token) => autocomplete.includes(token))) return true;
+    return [dom.name, dom.ariaLabel].some((attr) => attr !== undefined && this.isSecretField(attr));
+  }
+
+  /**
+   * Returns why an action counts as state-changing, or null if it is read-only.
+   * With DOM facts present the agent's own label is ignored: a hijacked agent can
+   * call the "Pay" button "View details", but it cannot change the button's text.
+   * A CLICK without DOM facts cannot be verified, so it fails closed.
+   */
+  public stateChangeReason(action: Action): string | null {
     if (action.isStateChanging || action.type === 'SUBMIT') {
-      return true;
+      return 'declared state-changing';
     }
 
-    const targetLower = action.target.toLowerCase();
-    const labelLower = action.humanLabel.toLowerCase();
+    const matches = (s?: string) =>
+      s !== undefined && this.config.stateChangingKeywords.some((kw) => s.toLowerCase().includes(kw));
 
-    return this.config.stateChangingKeywords.some(
-      (kw) => targetLower.includes(kw) || labelLower.includes(kw)
-    );
+    if (action.dom) {
+      const { text, ariaLabel, value, formAction } = action.dom;
+      const hit = [text, ariaLabel, value, formAction, action.target].find((s) => matches(s));
+      return hit ? `page element reads '${hit.trim()}'` : null;
+    }
+
+    if (action.type === 'CLICK') {
+      return 'no DOM facts available to verify what this click does (fail-closed)';
+    }
+
+    return matches(action.target) || matches(action.humanLabel) ? 'target or label matches a state-changing keyword' : null;
+  }
+
+  public isStateChangingAction(action: Action): boolean {
+    return this.stateChangeReason(action) !== null;
+  }
+
+  /** Every URL an action could send the browser to: navigation, link or form target. */
+  private outboundUrls(action: Action): string[] {
+    const urls: string[] = [];
+    if (action.type === 'NAVIGATE' && action.value) urls.push(action.value);
+    if (action.dom?.href) urls.push(action.dom.href);
+    if (action.dom?.formAction) urls.push(action.dom.formAction);
+    return urls;
   }
 
   /**
@@ -116,7 +161,7 @@ export class DeterministicPolicyGuard {
     const timestamp = Date.now();
 
     // 1. Secret Field Protection
-    if (action.type === 'TYPE' && this.isSecretField(action.target)) {
+    if (action.type === 'TYPE' && (this.isSecretField(action.target) || this.isSecretDomElement(action.dom))) {
       const decision: PolicyDecision = {
         status: 'BLOCK',
         reason: `Agent attempted to type into protected secret field '${action.target}'.`,
@@ -129,9 +174,9 @@ export class DeterministicPolicyGuard {
       return decision;
     }
 
-    // 2. Navigation Allowlist Check
-    if (action.type === 'NAVIGATE' && action.value) {
-      const netCheck = this.evaluateNetworkRequest(action.value);
+    // 2. Allowlist check on every destination: navigation, link href, form action
+    for (const url of this.outboundUrls(action)) {
+      const netCheck = this.evaluateNetworkRequest(url);
       if (!netCheck.allowed) {
         const decision: PolicyDecision = {
           status: 'BLOCK',
@@ -147,10 +192,11 @@ export class DeterministicPolicyGuard {
     }
 
     // 3. Human Gate for State-Changing Operations
-    if (this.isStateChangingAction(action)) {
+    const changeReason = this.stateChangeReason(action);
+    if (changeReason) {
       const decision: PolicyDecision = {
         status: 'REQUIRE_APPROVAL',
-        reason: `Action '${action.humanLabel}' on '${action.target}' is state-changing and requires human confirmation.`,
+        reason: `Action '${action.humanLabel}' on '${action.target}' is state-changing (${changeReason}) and requires human confirmation.`,
         violatedRule: 'RULE_HUMAN_APPROVAL_GATE',
         riskLevel: 'HIGH',
         action,

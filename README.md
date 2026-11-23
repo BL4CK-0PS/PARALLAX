@@ -6,14 +6,14 @@
 [![Hackathon](https://img.shields.io/badge/wHACKiest%202026-CodeRIT%20%7C%20RIT%20Bengaluru-orange.svg)](#)
 [![Track](https://img.shields.io/badge/Track%202-Beyond%20the%20Browser-purple.svg)](#)
 [![Team](https://img.shields.io/badge/Team-BL4CK__0P%24-black.svg)](#)
-[![TypeScript](https://img.shields.io/badge/TypeScript-7.0-blue.svg)](#)
-[![Playwright](https://img.shields.io/badge/Playwright-1.65-green.svg)](#)
 [![Runtime Security](https://img.shields.io/badge/Policy-Deterministic%20Fail--Closed-red.svg)](#)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 
 ---
 
 ## 1. Executive Summary
+
+> **In one line:** a safety layer for AI browser agents that blocks dangerous actions, explains failures and records everything. Measured before/after: run `npm run eval` in `parallax/` (14 attack techniques: 14 run unguarded, 0 with PARALLAX). Details: [`parallax/docs/submission/BEFORE_AFTER.md`](parallax/docs/submission/BEFORE_AFTER.md).
 
 Autonomous web agents are rapidly evolving from passive assistants into active decision-makers that navigate multi-step web applications, fill out forms, and trigger transactions. However, when deployed in complex, untrusted web environments, existing browser agents suffer from three fundamental flaws:
 1. **Fragile State Recovery:** When a web workflow fails (due to session timeouts, async validation errors, or dynamic DOM shifts), agents hallucinate explanations and get stuck in endless retry loops.
@@ -211,7 +211,7 @@ npm run dev
 npm run test:security
 ```
 Tests pass when:
-- 100% of unauthorized off-site network requests are aborted by the network guard.
+- Every off-allowlist request in the suite is aborted by the network guard.
 - All state-changing clicks trigger a blocking human approval prompt.
 - Password and secret fields are scrubbed from LLM inputs.
 

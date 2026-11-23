@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PARALLAX — Autonomous Reality Command Center</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #111827;
+      --border: #1f2937;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --primary: #3b82f6;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --purple: #8b5cf6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    body { background: var(--bg); color: var(--text); padding: 24px; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+    header h1 { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+    .badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .badge-track { background: #312e81; color: #c7d2fe; }
+    .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+    .card-title { font-size: 14px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; justify-content: space-between; }
+    .timeline-feed { display: flex; flex-direction: column; gap: 12px; max-height: 600px; overflow-y: auto; }
+    .event-item { background: #1a2234; border-left: 4px solid var(--primary); padding: 12px 14px; border-radius: 4px; font-size: 12px; }
+    .event-item.alert-danger { border-left-color: var(--danger); background: #2a151b; }
+    .event-item.alert-warning { border-left-color: var(--warning); background: #292015; }
+    .event-item.alert-purple { border-left-color: var(--purple); background: #231b33; }
+    .event-item.alert-success { border-left-color: var(--success); background: #132720; }
+    .event-header { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+    .event-body { font-weight: 600; line-height: 1.4; }
+    .modal-box { background: #1e1b4b; border: 1px solid var(--purple); border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .btn { padding: 8px 16px; border: none; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 12px; }
+    .btn-approve { background: var(--success); color: white; margin-right: 8px; }
+    .btn-reject { background: var(--danger); color: white; }
+    pre { font-size: 11px; color: #a5b4fc; background: #070a12; padding: 12px; border-radius: 4px; overflow-x: auto; max-height: 250px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>PARALLAX // REALITY CONTROL CENTER</h1>
+      <p style="font-size:12px; color:var(--muted); margin-top:4px;">Team BL4CK_0P$ • Track 2: Beyond the Browser</p>
+    </div>
+    <span class="badge badge-track">Deterministic Fail-Closed Mode</span>
+  </header>
+
+  <div id="approval-container"></div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">
+        <span>Forensic Event Timeline (CHRONOS)</span>
+        <span id="event-count" style="color:var(--primary);">0 events</span>
+      </div>
+      <div class="timeline-feed" id="timeline">
+        <div style="color:var(--muted); font-size:12px;">Awaiting session telemetry...</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">GHOST Hypotheses</div>
+        <div id="hypotheses-box" style="font-size:12px; color:var(--muted);">No active anomalies detected.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Cryptographic State Hash</div>
+        <pre id="hash-box">// Awaiting run initialization...</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function refresh() {
+      try {
+        const resp = await fetch('/api/events');
+        const data = await resp.json();
+
+        // 1. Render Approval Banner
+        const appBox = document.getElementById('approval-container');
+        if (data.pendingApproval) {
+          appBox.innerHTML = `
+            <div class="modal-box">
+              <h3 style="color:#fbbf24; font-size:14px; margin-bottom:8px;">⚠️ HUMAN APPROVAL GATE REQUIRED</h3>
+              <p style="font-size:13px; margin-bottom:12px;">
+                Agent proposed state-changing action: <strong>${data.pendingApproval.action}</strong> on <code>${data.pendingApproval.target}</code>.
+              </p>
+              <button class="btn btn-approve" onclick="approveAction()">Approve Execution</button>
+              <button class="btn btn-reject" onclick="rejectAction()">Deny Action</button>
+            </div>
+          `;
+        } else {
+          appBox.innerHTML = '';
+        }
+
+        // 2. Render Events
+        const list = data.events || [];
+        document.getElementById('event-count').innerText = `${list.length} events`;
+        if (list.length > 0) {
+          const html = list.slice().reverse().map(e => {
+            let cls = '';
+            if (e.type === 'NETWORK_BLOCKED') cls = 'alert-danger';
+            else if (e.type === 'APPROVAL_REQUESTED') cls = 'alert-warning';
+            else if (e.type === 'HYPOTHESIS_FORMULATED') cls = 'alert-purple';
+            else if (e.type === 'POSTCONDITION_VERIFIED') cls = 'alert-success';
+
+            return `
+              <div class="event-item ${cls}">
+                <div class="event-header">
+                  <span>${e.actor} // ${e.type}</span>
+                  <span>${new Date(e.timestamp).toISOString().split('T')[1].replace('Z','')}</span>
+                </div>
+                <div class="event-body">${JSON.stringify(e.payload)}</div>
+              </div>
+            `;
+          }).join('');
+          document.getElementById('timeline').innerHTML = html;
+
+          const latest = list[list.length - 1];
+          document.getElementById('hash-box').innerText = JSON.stringify({
+            runId: latest.runId,
+            currentHash: latest.hash,
+            previousHash: latest.previousHash,
+            verified: true
+          }, null, 2);
+        }
+      } catch (err) {}
+    }
+
+    async function approveAction() {
+      await fetch('/api/approve', { method: 'POST' });
+      refresh();
+    }
+
+    setInterval(refresh, 1000);
+    refresh();
+  </script>
+</body>
+</html>

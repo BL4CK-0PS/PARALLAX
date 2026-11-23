@@ -1,37 +1,54 @@
 # PARALLAX
+### Autonomous Digital Reality Intelligence
 
-Autonomous Digital Reality Intelligence. When a web task fails, find out why with evidence, test the cause, fix it only with approval, and prove it worked.
+> **Observe the present. Reconstruct the past. Challenge the system. Simulate the future. Verify every action.**
 
-**Status:** structure only. No code, no dependencies, stack not final. Source of truth: `PARALLAX_Technical_Master_Specification.docx` (one level up).
+[![Hackathon](https://img.shields.io/badge/wHACKiest%202026-CodeRIT%20%7C%20RIT%20Bengaluru-orange.svg)](#)
+[![Track](https://img.shields.io/badge/Track%202-Beyond%20the%20Browser-purple.svg)](#)
+[![Team](https://img.shields.io/badge/Team-BL4CK__0P%24-black.svg)](#)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7.0-blue.svg)](#)
+[![Playwright](https://img.shields.io/badge/Playwright-1.65-green.svg)](#)
+[![Runtime Security](https://img.shields.io/badge/Policy-Deterministic%20Fail--Closed-red.svg)](#)
 
-## Layout
+---
 
-| Path | Purpose | Spec § |
-|---|---|---|
-| `demo-app/pages` | Synthetic university application portal (UI) | 2.3, 20.1 |
-| `demo-app/server` | Deterministic backend state machine for the portal | 15.1, 20.1 |
-| `demo-app/failures` | Injectable failures: session expiry, hidden field dependency, async validation | 11.4 |
-| `demo-app/fixtures` | Synthetic users and data only. No real data. | 3.3 |
-| `src/capture` | Browser observation and replay (Playwright) | 5.2 |
-| `src/core` | Event contract, state model, normalizer, diff, store | 10, 19 |
-| `src/chronos` | Timeline reconstruction, last-good state, first failure | 13 |
-| `src/ghost` | Hypothesis-discriminating safe experiments | 11 |
-| `src/mirror` | Transition model, recovery candidate comparison | 12 |
-| `src/policy` | Allowlist, approval, invariants. Deterministic, fail closed. | 15.2, 16 |
-| `src/planner` | Bounded recovery plan search and ranking | 14 |
-| `src/verify` | Postcondition checks against the test backend | 15, 22.3 |
-| `src/llm` | Model client and explanation. Has no execution authority. | 9 |
-| `ui` | Command center: timeline, hypotheses, approval, audit report | 5.1 |
-| `tests/{unit,integration,e2e,security}` | Layers per spec §22.1 | 22 |
-| `scripts` | Run, seed, reset helpers | — |
-| `data` | Run logs and evidence. Git-ignored. | 19.3 |
-| `deploy` | Notes for the GPU server (L40 x2) | 18 |
-| `docs/decisions` | Short decision records (stack, model, scope cuts) | — |
-| `docs/submission` | PPT, video script, Devnovate checklist | — |
+## Overview
 
-## Rules (from the spec)
+PARALLAX is an autonomous digital reality intelligence platform designed to govern, diagnose, and recover complex browser automation tasks. Rather than letting LLMs operate as unconstrained black-box agents, PARALLAX:
+1. **Reconstructs History (CHRONOS):** Captures full DOM and network state diffs to pinpoint where a workflow broke.
+2. **Conducts Controlled Experiments (GHOST):** Discriminates failure hypotheses (e.g. session drops vs. missing form dependencies) safely.
+3. **Simulates Recovery (MIRROR):** Evaluates bounded recovery candidates before executing them.
+4. **Enforces Deterministic Security:** Hard network allowlists, secret-field bans, and human confirmation gates for state-changing actions.
 
-- Raw evidence is separate from interpretation. Use "observed before / supports", not "caused".
-- The LLM proposes; the policy engine decides. Page content is untrusted data.
-- Every number shown in a demo comes from a recorded run. Label anything illustrative.
-- Synthetic data and local or isolated targets only.
+For full architectural blueprints, diagrams, and getting started instructions, see the **[Root Repository README](../README.md)** and the technical specifications in the root directory.
+
+---
+
+## Directory Index
+
+| Path | Purpose |
+|---|---|
+| [`demo-app/pages`](demo-app/pages/) | Synthetic university application portal UI |
+| [`demo-app/server`](demo-app/server/) | Deterministic backend state machine for the portal |
+| [`demo-app/failures`](demo-app/failures/) | Injectable failures: session expiry, dynamic field dependencies |
+| [`demo-app/fixtures`](demo-app/fixtures/) | Synthetic personas and test datasets (zero PII) |
+| [`src/capture`](src/capture/) | Browser observation and CDP network allowlisting (Playwright) |
+| [`src/core`](src/core/) | Typed event contract, state model, normalizer, diff engine |
+| [`src/chronos`](src/chronos/) | Temporal reconstruction, last-good state, first failure identification |
+| [`src/ghost`](src/ghost/) | Hypothesis-discriminating safe micro-experiments |
+| [`src/mirror`](src/mirror/) | Transition model & recovery candidate comparison |
+| [`src/policy`](src/policy/) | Deterministic fail-closed policy engine & approval gate |
+| [`src/planner`](src/planner/) | Bounded recovery plan search and ranking |
+| [`src/verify`](src/verify/) | Postcondition verification against target state |
+| [`src/llm`](src/llm/) | Model client for structured proposals (zero direct execution authority) |
+| [`ui/`](ui/) | Command center: timeline replay, hypotheses, approval gate |
+| [`tests/`](tests/) | Unit, integration, e2e, and security test suites |
+| [`deploy/`](deploy/) | GPU server (2× L40) and local development configurations |
+
+---
+
+## Engineering Rules
+
+* **Evidence over Interpretation:** Observations (`observed before`, `supports hypothesis`) are kept separate from causal inferences.
+* **LLM Proposes, Deterministic Policy Decides:** The model has zero direct execution privileges over the browser or network.
+* **Synthetic Targets Only:** All testing and demonstrations run against local, reproducible test fixtures.

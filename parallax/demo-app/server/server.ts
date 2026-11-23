@@ -17,9 +17,12 @@ interface ApplicationRecord {
   timestamp: number;
 }
 
+export type FailureInjectionMode = 'NONE' | 'SESSION_EXPIRY' | 'HIDDEN_DEPENDENCY' | 'CSRF_MISMATCH';
+
 export class DemoServer {
   private server?: http.Server;
   private isSessionActive = true;
+  private activeFailureMode: FailureInjectionMode = 'NONE';
   private pendingApplications: Map<string, Partial<ApplicationRecord>> = new Map();
   private acceptedApplications: ApplicationRecord[] = [];
   public port: number;
@@ -32,8 +35,16 @@ export class DemoServer {
     this.isSessionActive = active;
   }
 
+  public setFailureMode(mode: FailureInjectionMode): void {
+    this.activeFailureMode = mode;
+    if (mode === 'SESSION_EXPIRY') {
+      this.isSessionActive = false;
+    }
+  }
+
   public reset(): void {
     this.isSessionActive = true;
+    this.activeFailureMode = 'NONE';
     this.pendingApplications.clear();
     this.acceptedApplications = [];
   }
@@ -59,7 +70,7 @@ export class DemoServer {
 
         // 1. Session Status
         if (pathname === '/api/session' && req.method === 'GET') {
-          if (!this.isSessionActive) {
+          if (!this.isSessionActive || this.activeFailureMode === 'SESSION_EXPIRY') {
             res.writeHead(401, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ active: false, error: 'Session expired' }));
             return;
@@ -69,17 +80,27 @@ export class DemoServer {
           return;
         }
 
-        // 2. Injected Failure Trigger: Expire Session
-        if (pathname === '/api/session/expire') {
-          this.isSessionActive = false;
+        // 2. Failure Injection Controller
+        if (pathname === '/api/failure/inject') {
+          const mode = (parsedUrl.searchParams.get('mode') || 'SESSION_EXPIRY').toUpperCase() as FailureInjectionMode;
+          this.setFailureMode(mode);
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ active: false, message: 'Session manually expired for testing' }));
+          res.end(JSON.stringify({ success: true, activeFailureMode: this.activeFailureMode }));
+          return;
+        }
+
+        if (pathname === '/api/failure/clear') {
+          this.setFailureMode('NONE');
+          this.isSessionActive = true;
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, activeFailureMode: 'NONE' }));
           return;
         }
 
         // 3. Recovery Trigger: Refresh Session
         if (pathname === '/api/session/refresh') {
           this.isSessionActive = true;
+          this.activeFailureMode = 'NONE';
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ active: true, token: 'SES_RENEWED_10928' }));
           return;
@@ -111,7 +132,7 @@ export class DemoServer {
             const sop = String(data.statementOfPurpose || '').trim();
 
             // Injectable Failure: Hidden Field Dependency
-            if (isMerit && !sop) {
+            if ((isMerit && !sop) || this.activeFailureMode === 'HIDDEN_DEPENDENCY') {
               res.writeHead(400, { 'Content-Type': 'application/json' });
               res.end(
                 JSON.stringify({
@@ -135,7 +156,7 @@ export class DemoServer {
 
         // 6. Step 3: Final Submit Application
         if (pathname === '/api/apply/submit' && req.method === 'POST') {
-          if (!this.isSessionActive) {
+          if (!this.isSessionActive || this.activeFailureMode === 'SESSION_EXPIRY') {
             res.writeHead(401, { 'Content-Type': 'application/json' });
             res.end(
               JSON.stringify({
@@ -186,6 +207,13 @@ export class DemoServer {
         if (pathname === '/api/admin/applications' && req.method === 'GET') {
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ applications: this.acceptedApplications }));
+          return;
+        }
+
+        if (pathname === '/api/admin/reset' && req.method === 'POST') {
+          this.reset();
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, message: 'Server state reset.' }));
           return;
         }
 

@@ -5,8 +5,8 @@
   "type": "module",
   "main": "src/core/types.ts",
   "scripts": {
-    "test": "node --experimental-strip-types --test tests/unit/guard.test.ts tests/unit/core.test.ts tests/security/invariants.test.ts",
-    "test:security": "node --experimental-strip-types --test tests/security/security.test.ts tests/security/invariants.test.ts",
+    "test": "node --experimental-strip-types --test tests/unit/*.test.ts tests/security/*.test.ts tests/integration/*.test.ts",
+    "test:security": "node --experimental-strip-types --test tests/security/*.test.ts",
     "demo:server": "node --experimental-strip-types demo-app/server/server.ts",
     "demo:ui": "node --experimental-strip-types ui/server.ts",
     "demo:run": "node --experimental-strip-types scripts/run-demo.ts"

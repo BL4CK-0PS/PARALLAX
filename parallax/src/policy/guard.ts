@@ -1,4 +1,4 @@
-import type { Action, PolicyDecision, PolicyStatus } from '../core/types.ts';
+import type { Action, PolicyDecision, PolicyLedgerEntry, PolicyStatus } from '../core/types.ts';
 
 export interface GuardConfig {
   allowedHosts: string[];
@@ -15,7 +15,9 @@ export const DEFAULT_GUARD_CONFIG: GuardConfig = {
     /credit[_-]?card/i,
     /ssn/i,
     /token/i,
-    /otp/i
+    /otp/i,
+    /auth[_-]?code/i,
+    /api[_-]?key/i
   ],
   stateChangingKeywords: [
     'submit',
@@ -25,12 +27,15 @@ export const DEFAULT_GUARD_CONFIG: GuardConfig = {
     'purchase',
     'delete',
     'checkout',
-    'finalize'
+    'finalize',
+    'authorize',
+    'transfer'
   ]
 };
 
 export class DeterministicPolicyGuard {
   private config: GuardConfig;
+  private ledger: PolicyLedgerEntry[] = [];
 
   constructor(config?: Partial<GuardConfig>) {
     this.config = {
@@ -38,6 +43,16 @@ export class DeterministicPolicyGuard {
       sensitiveFieldPatterns: config?.sensitiveFieldPatterns ?? DEFAULT_GUARD_CONFIG.sensitiveFieldPatterns,
       stateChangingKeywords: config?.stateChangingKeywords ?? DEFAULT_GUARD_CONFIG.stateChangingKeywords
     };
+  }
+
+  public getAllowedHosts(): string[] {
+    return [...this.config.allowedHosts];
+  }
+
+  public addAllowedHost(host: string): void {
+    if (!this.config.allowedHosts.includes(host)) {
+      this.config.allowedHosts.push(host);
+    }
   }
 
   /**
@@ -57,7 +72,7 @@ export class DeterministicPolicyGuard {
       if (!isAllowed) {
         return {
           allowed: false,
-          reason: `Network request to '${host}' blocked by strict allowlist. Possible exfiltration attempt.`
+          reason: `Network request to '${host}' blocked by strict allowlist. Exfiltration rejected.`
         };
       }
 
@@ -71,14 +86,14 @@ export class DeterministicPolicyGuard {
   }
 
   /**
-   * Checks if an input element is a protected secret field.
+   * Checks if an input element or selector targets a protected secret field.
    */
   public isSecretField(targetSelector: string): boolean {
     return this.config.sensitiveFieldPatterns.some((pattern) => pattern.test(targetSelector));
   }
 
   /**
-   * Detects if an action modifies external state or makes irreversible changes.
+   * Detects if an action modifies external state or performs an irreversible operation.
    */
   public isStateChangingAction(action: Action): boolean {
     if (action.isStateChanging || action.type === 'SUBMIT') {
@@ -95,17 +110,14 @@ export class DeterministicPolicyGuard {
 
   /**
    * Evaluates an agent action before it touches the browser.
-   * Returns:
-   *  - ALLOW: safe read/nav/input
-   *  - BLOCK: violates security boundary (secret typing, exfil)
-   *  - REQUIRE_APPROVAL: state-changing action requiring human consent
+   * Appends decision to the immutable policy ledger.
    */
-  public evaluateAction(action: Action): PolicyDecision {
+  public evaluateAction(action: Action, runId = 'default_run'): PolicyDecision {
     const timestamp = Date.now();
 
     // 1. Secret Field Protection
     if (action.type === 'TYPE' && this.isSecretField(action.target)) {
-      return {
+      const decision: PolicyDecision = {
         status: 'BLOCK',
         reason: `Agent attempted to type into protected secret field '${action.target}'.`,
         violatedRule: 'RULE_SECRET_FIELD_BAN',
@@ -113,13 +125,15 @@ export class DeterministicPolicyGuard {
         action,
         timestamp
       };
+      this.recordLedgerEntry(runId, decision);
+      return decision;
     }
 
     // 2. Navigation Allowlist Check
     if (action.type === 'NAVIGATE' && action.value) {
       const netCheck = this.evaluateNetworkRequest(action.value);
       if (!netCheck.allowed) {
-        return {
+        const decision: PolicyDecision = {
           status: 'BLOCK',
           reason: netCheck.reason,
           violatedRule: 'RULE_NETWORK_ALLOWLIST',
@@ -127,12 +141,14 @@ export class DeterministicPolicyGuard {
           action,
           timestamp
         };
+        this.recordLedgerEntry(runId, decision);
+        return decision;
       }
     }
 
     // 3. Human Gate for State-Changing Operations
     if (this.isStateChangingAction(action)) {
-      return {
+      const decision: PolicyDecision = {
         status: 'REQUIRE_APPROVAL',
         reason: `Action '${action.humanLabel}' on '${action.target}' is state-changing and requires human confirmation.`,
         violatedRule: 'RULE_HUMAN_APPROVAL_GATE',
@@ -140,16 +156,57 @@ export class DeterministicPolicyGuard {
         action,
         timestamp
       };
+      this.recordLedgerEntry(runId, decision);
+      return decision;
     }
 
     // 4. Default: Safe operation allowed
-    return {
+    const decision: PolicyDecision = {
       status: 'ALLOW',
       reason: `Action '${action.humanLabel}' passed deterministic policy invariants.`,
       riskLevel: 'LOW',
       action,
       timestamp
     };
+    this.recordLedgerEntry(runId, decision);
+    return decision;
+  }
+
+  private recordLedgerEntry(runId: string, decision: PolicyDecision): void {
+    this.ledger.push({
+      id: `led_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      runId,
+      timestamp: decision.timestamp,
+      decision
+    });
+  }
+
+  /**
+   * Resolves a pending human approval in the ledger with audit trail.
+   */
+  public resolveHumanApproval(
+    actionId: string,
+    approved: boolean,
+    operator = 'Human_Operator',
+    notes?: string
+  ): boolean {
+    const entry = this.ledger.find(
+      (e) => e.decision.action.id === actionId && e.decision.status === 'REQUIRE_APPROVAL'
+    );
+    if (!entry) return false;
+
+    entry.humanResolution = {
+      resolvedBy: operator,
+      decision: approved ? 'APPROVED' : 'DENIED',
+      timestamp: Date.now(),
+      notes
+    };
+    return true;
+  }
+
+  public getLedger(runId?: string): PolicyLedgerEntry[] {
+    if (!runId) return [...this.ledger];
+    return this.ledger.filter((e) => e.runId === runId);
   }
 
   /**

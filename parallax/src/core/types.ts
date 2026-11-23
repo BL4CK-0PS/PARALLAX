@@ -1,10 +1,10 @@
 /**
  * PARALLAX Core Domain Contracts and Types
- * Version: 1.0.0
+ * Version: 1.1.0
  * Authors: BL4CK_0P$ (Track 2: Beyond the Browser, wHACKiest 2026)
  */
 
-export const PARALLAX_VERSION = '1.0.0';
+export const PARALLAX_VERSION = '1.1.0';
 
 export type EventType =
   | 'DOM_OBSERVED'
@@ -62,6 +62,19 @@ export interface PolicyDecision {
   timestamp: number;
 }
 
+export interface PolicyLedgerEntry {
+  id: string;
+  runId: string;
+  timestamp: number;
+  decision: PolicyDecision;
+  humanResolution?: {
+    resolvedBy: string;
+    decision: 'APPROVED' | 'DENIED';
+    timestamp: number;
+    notes?: string;
+  };
+}
+
 export interface EventRecord {
   id: string;
   runId: string;
@@ -115,11 +128,24 @@ export interface Hypothesis {
   status: 'PROPOSED' | 'CONFIRMED' | 'REFUTED';
 }
 
+export interface RecoveryCandidate {
+  id: string;
+  strategyName: string;
+  actions: Action[];
+  expectedBenefitScore: number; // 0.0 - 1.0
+  riskScore: number;            // 0.0 - 1.0 (lower is better)
+  compositeUtilityScore: number; // 0.0 - 1.0
+  requiresHumanApproval: boolean;
+  predictedOutcome: string;
+}
+
 export interface RecoveryPlan {
   id: string;
   runId: string;
   hypothesisId: string;
   strategyName: string;
+  selectedCandidate: RecoveryCandidate;
+  alternativeCandidates: RecoveryCandidate[];
   actions: Action[];
   predictedOutcome: string;
   riskAssessment: 'LOW' | 'MEDIUM' | 'HIGH';
@@ -137,4 +163,19 @@ export interface VerificationResult {
   verified: boolean;
   checks: PostconditionCheck[];
   timestamp: number;
+}
+
+export interface AuditReport {
+  runId: string;
+  generatedAt: number;
+  totalEvents: number;
+  eventChainValid: boolean;
+  invariantsEvaluated: number;
+  invariantsPassed: number;
+  blockedThreats: number;
+  approvalsRequested: number;
+  approvalsGranted: number;
+  recoveryExecutions: number;
+  finalVerificationPassed: boolean;
+  headHash: string;
 }

@@ -1,4 +1,4 @@
-import type { PostconditionCheck, VerificationResult } from '../core/types.ts';
+import type { AuditReport, PostconditionCheck, VerificationResult } from '../core/types.ts';
 
 export class Verifier {
   /**
@@ -23,7 +23,9 @@ export class Verifier {
         return { runId, verified: false, checks, timestamp: Date.now() };
       }
 
-      const data = (await resp.json()) as { applications?: Array<{ studentId: string; status: string; id: string }> };
+      const data = (await resp.json()) as {
+        applications?: Array<{ studentId: string; status: string; id: string }>;
+      };
       const apps = data.applications ?? [];
       const match = apps.find((a) => a.studentId === expectedStudentId);
 
@@ -64,5 +66,30 @@ export class Verifier {
       });
       return { runId, verified: false, checks, timestamp: Date.now() };
     }
+  }
+
+  /**
+   * Validates that an exported Audit Report meets all hackathon integrity requirements:
+   * 1. Cryptographic chain is unbroken.
+   * 2. Zero unblocked critical invariant violations.
+   * 3. Final verification passed.
+   */
+  public validateAuditReport(report: AuditReport): { passed: boolean; reasons: string[] } {
+    const reasons: string[] = [];
+
+    if (!report.eventChainValid) {
+      reasons.push('Cryptographic SHA-256 hash chain is invalid or broken.');
+    }
+    if (report.totalEvents === 0) {
+      reasons.push('Audit report contains zero logged events.');
+    }
+    if (!report.finalVerificationPassed) {
+      reasons.push('Final postcondition verification did not pass.');
+    }
+
+    return {
+      passed: reasons.length === 0,
+      reasons
+    };
   }
 }

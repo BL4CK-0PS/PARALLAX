@@ -1,4 +1,4 @@
-import type { Action, PolicyDecision, StateSnapshot } from '../core/types.ts';
+import type { Action, EventRecord, PolicyDecision, StateSnapshot } from '../core/types.ts';
 
 export interface InvariantResult {
   invariantId: string;
@@ -6,6 +6,13 @@ export interface InvariantResult {
   satisfied: boolean;
   violationReason?: string;
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+}
+
+export interface RunAuditEvaluation {
+  allSatisfied: boolean;
+  totalChecks: number;
+  passedChecks: number;
+  violations: InvariantResult[];
 }
 
 /**
@@ -83,7 +90,7 @@ export class InvariantEngine {
 
   /**
    * INVARIANT 3: NO_UNCONFIRMED_STATE_MUTATION
-   * Irreversible or state-changing actions (submitting, paying, deleting) strictly require verified human confirmation.
+   * Irreversible or state-changing actions strictly require verified human confirmation.
    */
   public static checkStateMutation(action: Action, isHumanConfirmed: boolean): InvariantResult {
     if (!action.isStateChanging && action.type !== 'SUBMIT') {
@@ -133,6 +140,41 @@ export class InvariantEngine {
       name: 'Bounded Recovery Under Validated Hypotheses',
       satisfied: true,
       riskLevel: 'LOW'
+    };
+  }
+
+  /**
+   * Performs an end-of-run forensic audit across all logged event records.
+   */
+  public static auditRunInvariants(events: EventRecord[], allowedHosts: string[]): RunAuditEvaluation {
+    const violations: InvariantResult[] = [];
+    let totalChecks = 0;
+
+    for (const evt of events) {
+      // Check network requests in payloads
+      if (evt.type === 'NETWORK_REQUEST' && typeof evt.payload.url === 'string') {
+        totalChecks++;
+        const netRes = this.checkNetworkBoundary(evt.payload.url, allowedHosts);
+        if (!netRes.satisfied) violations.push(netRes);
+      }
+
+      // Check actions in payloads
+      if (evt.type === 'ACTION_DISPATCHED' && evt.payload.target) {
+        totalChecks++;
+        const secRes = this.checkCredentialIsolation(
+          String(evt.payload.target),
+          evt.payload.value ? String(evt.payload.value) : undefined
+        );
+        if (!secRes.satisfied) violations.push(secRes);
+      }
+    }
+
+    const passedChecks = totalChecks - violations.length;
+    return {
+      allSatisfied: violations.length === 0,
+      totalChecks,
+      passedChecks,
+      violations
     };
   }
 }

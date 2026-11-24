@@ -35,9 +35,9 @@ This measures what happens *after* a model is fooled. It is not a detection rate
 **Try it yourself:** `npm run dev`, then open <http://localhost:5173/playground>. Replay the 14 attacks, or try to sneak your own URL, disguised button or secret field past the guard. Every verdict comes from the real policy engine.
 
 ## Honest status
-- **Real:** policy guard, event store with integrity check, recovery planner, verifier, demo backend, before/after harness (`npm test`: all green).
-- **Basic / scripted:** the demo agent follows a scripted path around the real guard and backend; GHOST classifies 3 known failure types by error pattern; MIRROR ranking is simple.
-- Playwright capture (`src/capture/browser.ts`) needs `npm i playwright` and must pass `dom` facts into every action (see `Action.dom` in `src/core/types.ts`).
+- **Real:** policy guard, event store with integrity check, recovery planner, verifier, demo backend, before/after harness, and (P2) a real Playwright browser: every click/type/submit reads `DomFacts` from the live element and passes the guard before dispatch; approvals in the Command Center control execution; GHOST runs read-only probes with documented evidence scoring; CHRONOS reconstructs last-good state from the event store.
+- **Deterministic, not an LLM:** the demo agent follows a fixed workflow. The "hijacked" Pay/navigation proposals are labelled simulations of what a fooled model would propose; the guard decides them for real. MIRROR candidate utilities are planner constants.
+- Run it: `npm install && npx playwright install chromium`, then `npm start` (Command Center on :5173) or `npm run demo:run -- full-demo`. Tests: `npm test` (no browser) and `npm run test:e2e` (real Chromium). Details: [`docs/P2_COMPLETION_REPORT.md`](docs/P2_COMPLETION_REPORT.md).
 
 Pitch material: [`docs/submission/PITCH_DECK_CONTENT.md`](docs/submission/PITCH_DECK_CONTENT.md) · [`docs/submission/WINNING_RULES.md`](docs/submission/WINNING_RULES.md). Architecture: [root README](../README.md).
 

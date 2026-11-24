@@ -8,8 +8,18 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "outDir": "./dist"
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/**/*", "demo-app/**/*", "tests/**/*", "ui/**/*", "scripts/**/*"]
+  "include": [
+    "src/**/*",
+    "demo-app/**/*",
+    "tests/**/*",
+    "ui/**/*",
+    "scripts/**/*"
+  ]
 }

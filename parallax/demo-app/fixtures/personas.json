@@ -1,0 +1,36 @@
+{
+  "_note": "Synthetic test personas. No real people, institutions or documents.",
+  "scholarApplicant": {
+    "name": "Alex Chen",
+    "email": "alex.chen@example.edu",
+    "studentId": "CS26-0912",
+    "applicationRef": "NU-FALL26-0912",
+    "course": "MS AI",
+    "cgpa": "8.70",
+    "previousInstitution": "Synthetic Institute of Technology",
+    "meritScholarship": true,
+    "supportingDocument": "Statement of purpose (synthetic): I intend to research reliable and verifiable browser automation, with a focus on deterministic safety controls for autonomous agents."
+  },
+  "scholarApplicantMissingDocument": {
+    "name": "Jordan Lee",
+    "email": "jordan.lee@example.edu",
+    "studentId": "CS26-0457",
+    "applicationRef": "NU-FALL26-0457",
+    "course": "M.Tech CSE",
+    "cgpa": "9.10",
+    "previousInstitution": "Synthetic College of Engineering",
+    "meritScholarship": true,
+    "supportingDocument": ""
+  },
+  "standardApplicant": {
+    "name": "Priya Raman",
+    "email": "priya.raman@example.edu",
+    "studentId": "CS26-0311",
+    "applicationRef": "",
+    "course": "MS Cyber",
+    "cgpa": "7.95",
+    "previousInstitution": "Synthetic University of Sciences",
+    "meritScholarship": false,
+    "supportingDocument": ""
+  }
+}

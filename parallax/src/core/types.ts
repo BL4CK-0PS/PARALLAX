@@ -22,7 +22,12 @@ export type EventType =
   | 'APPROVAL_GRANTED'
   | 'APPROVAL_DENIED'
   | 'POSTCONDITION_VERIFIED'
-  | 'POSTCONDITION_FAILED';
+  | 'POSTCONDITION_FAILED'
+  // Added for P2 capture (additive, backward compatible):
+  | 'ACTION_BLOCKED'           // guard returned BLOCK for a non-network rule (e.g. secret field)
+  | 'BROWSER_NAVIGATED'        // main-frame navigation observed by Playwright
+  | 'BROWSER_CONSOLE'          // console error / page error observed by Playwright
+  | 'FAULT_INJECTED';          // test harness injected a failure; never used as diagnostic evidence
 
 export type ActorType =
   | 'AGENT'
@@ -142,7 +147,7 @@ export interface Hypothesis {
   supportingEvidence: string[];
   contradictoryEvidence: string[];
   confidenceScore: number; // 0.0 - 1.0
-  status: 'PROPOSED' | 'CONFIRMED' | 'REFUTED';
+  status: 'PROPOSED' | 'CONFIRMED' | 'REFUTED' | 'INCONCLUSIVE';
 }
 
 export interface RecoveryCandidate {

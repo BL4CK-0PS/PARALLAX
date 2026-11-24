@@ -12,7 +12,11 @@
     "demo:server": "node --experimental-strip-types demo-app/server/server.ts",
     "demo:ui": "node --experimental-strip-types ui/server.ts",
     "demo:run": "node --experimental-strip-types scripts/run-demo.ts",
-    "eval": "node --experimental-strip-types scripts/eval.ts"
+    "eval": "node --experimental-strip-types scripts/eval.ts",
+    "test:e2e": "node --experimental-strip-types --test --test-concurrency=1 tests/e2e/*.test.ts",
+    "test:all": "npm test && npm run test:e2e",
+    "typecheck": "tsc --noEmit -p .",
+    "browsers:install": "playwright install chromium"
   },
   "keywords": [
     "browser-agent",
@@ -26,5 +30,12 @@
   "license": "MIT",
   "engines": {
     "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "playwright": "^1.65.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "^5.9.3"
   }
 }

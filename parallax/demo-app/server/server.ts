@@ -109,10 +109,26 @@ export class DemoServer {
         // 4. Step 1: Personal Information
         if (pathname === '/api/apply/step1' && req.method === 'POST') {
           this.parseJsonBody(req, (data) => {
-            const studentId = String(data.studentId || 'CS26-0912');
+            // Reject incomplete input instead of inventing a default applicant.
+            const studentId = typeof data.studentId === 'string' ? data.studentId.trim() : '';
+            const name = typeof data.name === 'string' ? data.name.trim() : '';
+            const email = typeof data.email === 'string' ? data.email.trim() : '';
+            const missing = [!name && 'name', !studentId && 'studentId'].filter(Boolean);
+            if (missing.length > 0 || (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(
+                JSON.stringify({
+                  success: false,
+                  error: missing.length > 0
+                    ? `Validation Error: missing required field(s): ${missing.join(', ')}.`
+                    : 'Validation Error: email address is not valid.'
+                })
+              );
+              return;
+            }
             this.pendingApplications.set(studentId, {
               studentId,
-              name: String(data.name || 'Alex Chen'),
+              name,
               status: 'SUBMITTED',
               timestamp: Date.now()
             });
@@ -168,19 +184,25 @@ export class DemoServer {
           }
 
           this.parseJsonBody(req, (data) => {
-            const studentId = String(data.studentId || 'CS26-0912');
-            const pending = this.pendingApplications.get(studentId) || {
-              studentId,
-              name: 'Alex Chen',
-              course: 'M.Tech CSE',
-              meritScholarship: false
-            };
+            const studentId = typeof data.studentId === 'string' ? data.studentId.trim() : '';
+            const pending = this.pendingApplications.get(studentId);
+            // Never fabricate an application: steps 1 and 2 must have been accepted first.
+            if (!pending || !pending.name || !pending.course) {
+              res.writeHead(409, { 'Content-Type': 'application/json' });
+              res.end(
+                JSON.stringify({
+                  success: false,
+                  error: 'Conflict: no completed application (steps 1 and 2) found for this student ID.'
+                })
+              );
+              return;
+            }
 
             const record: ApplicationRecord = {
               id: `APP-2026-${Math.floor(1000 + Math.random() * 9000)}`,
               studentId,
-              name: pending.name || 'Alex Chen',
-              course: pending.course || 'M.Tech CSE',
+              name: pending.name,
+              course: pending.course,
               meritScholarship: !!pending.meritScholarship,
               statementOfPurpose: pending.statementOfPurpose,
               status: 'ACCEPTED',
@@ -262,7 +284,8 @@ export class DemoServer {
 }
 
 // Standalone execution
-if (process.argv[1] && process.argv[1].endsWith('server.ts')) {
+// Only when this exact file is the entry point (ui/server.ts also ends in 'server.ts').
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
   const server = new DemoServer(3000);
   server.start().then(() => {
     console.log(`[PARALLAX] Synthetic University Portal running on http://127.0.0.1:3000`);

@@ -16,10 +16,10 @@ async function main() {
   console.log('  1. Target Admissions Portal : http://localhost:3000');
   console.log('  2. Reality Command Center   : http://localhost:5173');
   console.log('----------------------------------------------------------------------');
-  console.log('  ▶ Open http://localhost:5173 in your browser and click:');
-  console.log('     "[▶ Run Autonomous Agent Workflow]"');
-  console.log('  ▶ Watch the events stream live, see the prompt injection blocked,');
-  console.log('    and click "[Approve Execution]" when prompted!');
+  console.log('  ▶ Open http://localhost:5173, pick a scenario (full-demo) and press "Start run".');
+  console.log('  ▶ A real Chromium (headless; PARALLAX_HEADED=1 to watch it) drives the portal.');
+  console.log('  ▶ Deny the spoofed Pay click, approve the final submit, watch GHOST/CHRONOS diagnose');
+  console.log('    the injected session expiry, approve the resubmission, then press Replay.');
   console.log('----------------------------------------------------------------------\n');
   console.log('  Press Ctrl+C to stop the servers at any time.\n');
 

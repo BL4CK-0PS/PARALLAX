@@ -3,658 +3,373 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PARALLAX // Reality Control Center — wHACKiest 2026</title>
+  <title>PARALLAX — Command Center</title>
   <style>
-    :root {
-      --bg: #070b14;
-      --card-bg: #0d1527;
-      --card-border: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --primary: #3b82f6;
-      --primary-glow: rgba(59, 130, 246, 0.25);
-      --success: #10b981;
-      --success-glow: rgba(16, 185, 129, 0.2);
-      --danger: #ef4444;
-      --danger-glow: rgba(239, 68, 68, 0.25);
-      --warning: #f59e0b;
-      --warning-glow: rgba(245, 158, 11, 0.25);
-      --purple: #a855f7;
-      --purple-glow: rgba(168, 85, 247, 0.25);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: ui-monospace, SFMono-Regular, "SF Pro Text", Menlo, Consolas, sans-serif; }
-    html, body { height: 100%; min-height: 100%; margin: 0; padding: 0; overflow: hidden; }
-    body { background-color: var(--bg); color: var(--text-main); display: flex; flex-direction: column; }
-
-    /* Top Navigation Header */
-    header {
-      background: #0b1120;
-      border-bottom: 1px solid var(--card-border);
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .brand { display: flex; align-items: center; gap: 14px; }
-    .brand-logo {
-      width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6, #a855f7);
-      border-radius: 8px; display: flex; align-items: center; justify-content: center;
-      font-weight: 900; font-size: 16px; color: white; box-shadow: 0 0 15px var(--primary-glow);
-    }
-    .brand-text h1 { font-size: 15px; font-weight: 800; letter-spacing: 1.5px; color: #f8fafc; }
-    .brand-text p { font-size: 11px; color: var(--text-muted); }
-    .header-pills { display: flex; gap: 10px; align-items: center; }
-    .pill {
-      padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700;
-      display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase;
-      border: 1px solid var(--card-border); background: #131d33;
-    }
-    .pill-track { color: #c084fc; border-color: rgba(168, 85, 247, 0.4); }
-    .pill-status { color: #38bdf8; }
-    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; animation: blink 1.5s infinite; }
-    @keyframes blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
-
-    /* Stepper Workflow Progress */
-    .stepper-container {
-      background: #090e1c;
-      border-bottom: 1px solid var(--card-border);
-      padding: 8px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .stepper { display: flex; width: 100%; gap: 10px; }
-    .step-node {
-      flex: 1; background: #0f172a; border: 1px solid var(--card-border);
-      border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 8px;
-      transition: all 0.3s;
-    }
-    .step-node.active { border-color: var(--primary); background: #172554; box-shadow: 0 0 12px var(--primary-glow); }
-    .step-node.completed { border-color: var(--success); background: #062b1e; }
-    .step-node.warning { border-color: var(--warning); background: #3b2207; }
-    .step-node.danger { border-color: var(--danger); background: #3b0f16; }
-    .step-idx {
-      width: 20px; height: 20px; border-radius: 50%; background: #1e293b;
-      display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; flex-shrink: 0;
-    }
-    .step-node.active .step-idx { background: var(--primary); color: white; }
-    .step-node.completed .step-idx { background: var(--success); color: white; }
-    .step-details { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-    .step-name { font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .step-desc { font-size: 9.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    /* Main Workspace Split Layout */
-    .workspace {
-      display: grid;
-      grid-template-columns: 46% 54%;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
-      background: #050811;
-    }
-
-    /* Left Pane: Target Application Preview */
-    .pane-target {
-      border-right: 1px solid var(--card-border);
-      display: flex;
-      flex-direction: column;
-      background: #0a0f1d;
-      min-height: 0;
-    }
-    .pane-header {
-      background: #0d1527;
-      padding: 8px 14px;
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10.5px;
-      font-weight: 700;
-      color: var(--text-muted);
-      flex-shrink: 0;
-    }
-    .target-url {
-      background: #050914; padding: 3px 8px; border-radius: 4px;
-      border: 1px solid var(--card-border); color: #38bdf8; display: flex; align-items: center; gap: 6px;
-    }
-    .iframe-wrapper { flex: 1; width: 100%; height: 100%; min-height: 0; position: relative; background: #f8fafc; }
-    iframe { width: 100%; height: 100%; border: none; }
-
-    /* Right Pane: PARALLAX Intelligence Center */
-    .pane-control {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-height: 0;
-      overflow: hidden;
-      background: var(--bg);
-    }
-
-    /* Controls Bar */
-    .action-bar {
-      padding: 10px 16px;
-      background: #0b1120;
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .btn {
-      padding: 8px 16px; border: none; border-radius: 6px; font-size: 11.5px;
-      font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
-      text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.15s;
-    }
-    .btn-run { background: #2563eb; color: white; box-shadow: 0 0 10px var(--primary-glow); }
-    .btn-run:hover { background: #1d4ed8; }
-    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
-    .btn-reset { background: #1e293b; color: #cbd5e1; border: 1px solid var(--card-border); }
-    .btn-reset:hover { background: #334155; }
-
-    /* Policy Invariant Status Bar */
-    .invariants-bar {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      padding: 6px 16px;
-      background: #080d1a;
-      border-bottom: 1px solid var(--card-border);
-      flex-shrink: 0;
-    }
-    .inv-chip {
-      background: #0f172a; border: 1px solid #1e293b; border-radius: 4px;
-      padding: 4px 7px; font-size: 9.5px; display: flex; align-items: center; justify-content: space-between;
-    }
-    .inv-name { color: #cbd5e1; font-weight: 700; }
-    .inv-badge { font-size: 8.5px; padding: 2px 5px; border-radius: 3px; font-weight: 800; background: #064e3b; color: #6ee7b7; }
-
-    /* Interactive Approval Banner */
-    .approval-banner {
-      background: linear-gradient(90deg, #3b0764, #1e1b4b);
-      border-bottom: 2px solid var(--purple);
-      padding: 12px 16px;
-      animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      flex-shrink: 0;
-      box-shadow: 0 4px 20px var(--purple-glow);
-    }
-    @keyframes slideDown { from { transform: translateY(-15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .app-title { font-size: 12px; font-weight: 800; color: #fde047; display: flex; align-items: center; gap: 8px; text-transform: uppercase; margin-bottom: 4px; }
-    .app-desc { font-size: 11px; line-height: 1.45; color: #f1f5f9; margin-bottom: 10px; }
-    .app-buttons { display: flex; gap: 8px; }
-    .btn-approve { background: var(--success); color: white; padding: 7px 14px; font-size: 11px; box-shadow: 0 0 10px var(--success-glow); }
-    .btn-approve:hover { background: #059669; }
-    .btn-deny { background: var(--danger); color: white; padding: 7px 14px; font-size: 11px; }
-    .btn-deny:hover { background: #dc2626; }
-
-    /* Middle Dashboard Cards */
-    .dashboard-body {
-      display: grid;
-      grid-template-columns: 1.45fr 1fr;
-      gap: 12px;
-      padding: 12px 16px;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      min-height: 0;
-    }
-    .card-header {
-      padding: 8px 12px;
-      background: #0f182c;
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      letter-spacing: 0.5px;
-      flex-shrink: 0;
-    }
-
-    /* Timeline Feed - UNCLIPPED & SCROLLABLE */
-    .timeline-container {
-      flex: 1;
-      min-height: 0;
-      overflow-y: scroll;
-      overflow-x: hidden;
-      padding: 10px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      box-sizing: border-box;
-      scroll-behavior: smooth;
-    }
-    .timeline-container::-webkit-scrollbar {
-      width: 6px;
-    }
-    .timeline-container::-webkit-scrollbar-track {
-      background: #080d19;
-      border-radius: 3px;
-    }
-    .timeline-container::-webkit-scrollbar-thumb {
-      background: #25334d;
-      border-radius: 3px;
-    }
-    .timeline-container::-webkit-scrollbar-thumb:hover {
-      background: #3b82f6;
-    }
-
-    .event-card {
-      background: #111a30; border: 1px solid var(--card-border); border-left: 4px solid var(--primary);
-      border-radius: 6px; padding: 10px 12px; font-size: 11px; animation: fadeIn 0.2s ease-out;
-      width: 100%; box-sizing: border-box; word-break: break-word; overflow-wrap: anywhere;
-    }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-    .event-card.threat { border-left-color: var(--danger); background: #261118; }
-    .event-card.approval { border-left-color: var(--warning); background: #291b0c; }
-    .event-card.recovery { border-left-color: var(--purple); background: #201333; }
-    .event-card.verified { border-left-color: var(--success); background: #0c261a; }
-    
-    .event-meta { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--text-dim); margin-bottom: 4px; }
-    .event-tag { font-weight: 800; color: #93c5fd; }
-    .event-title { font-weight: 700; color: #f8fafc; line-height: 1.45; word-break: break-word; overflow-wrap: anywhere; }
-    .event-why {
-      margin-top: 5px; font-size: 10px; color: #94a3b8; background: rgba(0,0,0,0.35);
-      padding: 5px 8px; border-radius: 4px; border-left: 2px solid #334155;
-      line-height: 1.45; word-break: break-word; overflow-wrap: anywhere;
-    }
-    .event-card code {
-      word-break: break-all; overflow-wrap: anywhere; white-space: normal;
-      background: rgba(0, 0, 0, 0.45); padding: 2px 5px; border-radius: 4px; color: #38bdf8;
-      font-size: 10px;
-    }
-
-    /* Side Panels: GHOST & Cryptography */
-    .side-stack { display: flex; flex-direction: column; gap: 12px; height: 100%; min-height: 0; overflow: hidden; }
-    .side-box { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
-    .hypo-item { background: #0c1424; border: 1px solid #1e293b; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; }
-    .hypo-claim { font-size: 10.5px; font-weight: 700; color: #e9d5ff; margin-bottom: 4px; line-height: 1.4; word-break: break-word; }
-    .conf-track { height: 5px; background: #1e293b; border-radius: 3px; overflow: hidden; margin-top: 4px; }
-    .conf-fill { height: 100%; background: linear-gradient(90deg, #a855f7, #3b82f6); border-radius: 3px; }
-
-    pre.crypto-box {
-      flex: 1; font-size: 9.5px; color: #7dd3fc; background: #050811;
-      padding: 8px 10px; border-radius: 6px; border: 1px solid #0f1f3d; overflow: auto;
-      line-height: 1.45; min-height: 0; box-sizing: border-box;
-    }
+    :root { --bg:#070b14; --card:#0d1527; --border:#1e293b; --text:#e2e8f0; --muted:#94a3b8; --dim:#64748b;
+      --blue:#3b82f6; --green:#10b981; --red:#ef4444; --amber:#f59e0b; --purple:#a855f7; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; min-height:100vh; }
+    header { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); background:#0b1120; position:sticky; top:0; z-index:5; }
+    .brand { font-weight:800; letter-spacing:1.5px; } .brand small { color:var(--muted); font-weight:400; letter-spacing:0; margin-left:8px; }
+    .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    select, button { background:#131d33; color:var(--text); border:1px solid var(--border); border-radius:5px; padding:5px 10px; font:inherit; cursor:pointer; }
+    button:hover:not([disabled]) { border-color:var(--blue); } button[disabled] { opacity:.45; cursor:not-allowed; }
+    button.primary { background:#1d4ed8; border-color:#1d4ed8; } button.ok { background:#065f46; border-color:var(--green); } button.bad { background:#7f1d1d; border-color:var(--red); }
+    .pill { padding:2px 8px; border-radius:4px; border:1px solid var(--border); font-size:11px; font-weight:700; text-transform:uppercase; }
+    .pill.green { color:var(--green); border-color:var(--green); } .pill.red { color:var(--red); border-color:var(--red); }
+    .pill.amber { color:var(--amber); border-color:var(--amber); } .pill.purple { color:var(--purple); border-color:var(--purple); } .pill.blue { color:#60a5fa; border-color:var(--blue); }
+    #banner { display:none; padding:8px 16px; font-weight:700; } #banner.show { display:block; } #banner.err { background:#450a0a; color:#fecaca; } #banner.warn { background:#422006; color:#fde68a; }
+    main { display:grid; grid-template-columns:minmax(300px,1fr) minmax(360px,1.3fr) minmax(320px,1.1fr); gap:12px; padding:12px; }
+    @media (max-width:1200px) { main { grid-template-columns:1fr 1fr; } } @media (max-width:800px) { main { grid-template-columns:1fr; } }
+    section.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; min-width:0; }
+    section.card h2 { font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:6px; }
+    .span2 { grid-column:span 2; } @media (max-width:800px) { .span2 { grid-column:span 1; } }
+    dl.kv { display:grid; grid-template-columns:130px 1fr; gap:3px 8px; } dl.kv dt { color:var(--dim); } dl.kv dd { word-break:break-all; }
+    .empty { color:var(--dim); font-style:italic; padding:6px 0; }
+    #shot { width:100%; border:1px solid var(--border); border-radius:6px; margin-top:8px; background:#fff; min-height:40px; }
+    #timeline { list-style:none; max-height:560px; overflow:auto; }
+    #timeline li { display:grid; grid-template-columns:12px 86px 1fr; gap:6px; padding:4px 6px; border-left:3px solid transparent; cursor:pointer; border-radius:3px; }
+    #timeline li:hover, #timeline li:focus { background:#131d33; outline:none; } #timeline li.sel { background:#172554; }
+    #timeline li.future { opacity:.25; }
+    .dot { width:10px; height:10px; border-radius:50%; margin-top:3px; }
+    .c-NORMAL .dot { background:var(--green); } .c-FAILURE .dot { background:var(--red); } .c-GUARD_BLOCKED .dot { background:var(--purple); } .c-AWAITING_APPROVAL .dot { background:var(--amber); }
+    .c-FAILURE { border-left-color:var(--red) !important; } .c-GUARD_BLOCKED { border-left-color:var(--purple) !important; } .c-AWAITING_APPROVAL { border-left-color:var(--amber) !important; }
+    .t-time { color:var(--dim); font-size:11px; } .t-type { font-weight:700; font-size:11px; } .t-sum { color:var(--muted); font-size:12px; word-break:break-word; } .t-meta { color:var(--dim); font-size:10px; }
+    .legend { display:flex; gap:10px; font-size:11px; color:var(--muted); margin-bottom:6px; flex-wrap:wrap; } .legend span::before { content:'●'; margin-right:4px; }
+    .legend .g::before { color:var(--green); } .legend .r::before { color:var(--red); } .legend .p::before { color:var(--purple); } .legend .a::before { color:var(--amber); }
+    .hyp { border:1px solid var(--border); border-radius:6px; padding:8px; margin-bottom:8px; }
+    .bar { height:6px; background:#1e293b; border-radius:3px; margin:4px 0; } .bar > div { height:100%; border-radius:3px; background:var(--blue); }
+    .hyp ul { margin:2px 0 4px 16px; } .hyp li { font-size:12px; } .sup { color:#6ee7b7; } .con { color:#fca5a5; }
+    .approval { border:1px solid var(--amber); border-radius:6px; padding:10px; margin-bottom:10px; background:#1c1407; }
+    .approval img { max-width:100%; border:1px solid var(--border); background:#fff; margin:6px 0; }
+    table.facts { width:100%; border-collapse:collapse; font-size:12px; margin:6px 0; } table.facts td { border-bottom:1px solid var(--border); padding:2px 4px; vertical-align:top; word-break:break-all; } table.facts td:first-child { color:var(--dim); width:110px; }
+    .tabs { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:6px; } .tabs button { font-size:11px; padding:3px 8px; } .tabs button[aria-selected="true"] { border-color:var(--blue); background:#172554; }
+    pre { background:#050912; border:1px solid var(--border); border-radius:6px; padding:8px; max-height:480px; overflow:auto; font-size:11px; white-space:pre-wrap; word-break:break-word; }
+    .bench { display:grid; grid-template-columns:1fr auto auto; gap:4px 12px; } .bench .h { color:var(--dim); font-size:11px; }
+    .num { font-weight:800; font-size:15px; text-align:right; }
+    .note { color:var(--dim); font-size:11px; margin-top:6px; }
+    .recon h3 { font-size:12px; margin:8px 0 4px; color:var(--muted); } .recon ul { margin-left:16px; } .recon li { font-size:12px; }
   </style>
 </head>
 <body>
-
-  <!-- Top Navigation Header -->
   <header>
-    <div class="brand">
-      <div class="brand-logo">P</div>
-      <div class="brand-text">
-        <h1>PARALLAX // REALITY CONTROL CENTER</h1>
-        <p>Autonomous Web Agent Forensic Runtime • Team BL4CK_0P$ • Track 2: Beyond the Browser</p>
-      </div>
-    </div>
-    <div class="header-pills">
-      <div class="pill pill-track">wHACKiest 2026</div>
-      <div class="pill pill-status">
-        <span class="pulse-dot"></span>
-        <span id="runtime-status">STANDBY</span>
-      </div>
+    <div class="brand">PARALLAX <small>Command Center — live forensic view of real browser runs</small></div>
+    <div class="controls">
+      <label for="scenario" class="t-meta">Scenario</label>
+      <select id="scenario" aria-label="Scenario to run"></select>
+      <button class="primary" id="start">▶ Start run</button>
+      <button id="abort" disabled>■ Abort</button>
+      <label for="runs" class="t-meta">View</label>
+      <select id="runs" aria-label="Run to display"><option value="live">Live / latest run</option></select>
+      <span class="pill" id="conn">connecting</span>
+      <span class="pill" id="portal">portal ?</span>
     </div>
   </header>
+  <div id="banner" role="status" aria-live="polite"></div>
 
-  <!-- 5-Stage Stepper Progress Bar -->
-  <div class="stepper-container">
-    <div class="stepper">
-      <div class="step-node active" id="step-nav">
-        <div class="step-idx">1</div>
-        <div class="step-details">
-          <div class="step-name">Observation & Input</div>
-          <div class="step-desc">Playwright ARIA scan & fill</div>
-        </div>
-      </div>
-      <div class="step-node" id="step-threat">
-        <div class="step-idx">2</div>
-        <div class="step-details">
-          <div class="step-name">Injection Defense</div>
-          <div class="step-desc">Strict Allowlist Intercept (INV-1)</div>
-        </div>
-      </div>
-      <div class="step-node" id="step-failure">
-        <div class="step-idx">3</div>
-        <div class="step-details">
-          <div class="step-name">GHOST Diagnosis</div>
-          <div class="step-desc">401 Session Expiry isolated</div>
-        </div>
-      </div>
-      <div class="step-node" id="step-approval">
-        <div class="step-idx">4</div>
-        <div class="step-details">
-          <div class="step-name">Human Policy Gate</div>
-          <div class="step-desc">State Mutation Gate (INV-3)</div>
-        </div>
-      </div>
-      <div class="step-node" id="step-verify">
-        <div class="step-idx">5</div>
-        <div class="step-details">
-          <div class="step-name">Verification</div>
-          <div class="step-desc">SHA-256 Audit Sealed</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Workspace Split: Live Target App on Left | PARALLAX Engine on Right -->
-  <div class="workspace">
-
-    <!-- LEFT PANE: Target Application Live View -->
-    <section class="pane-target">
-      <div class="pane-header">
-        <span>TARGET BROWSER ENVIRONMENT</span>
-        <div class="target-url">
-          <span style="color:#10b981;">●</span>
-          <span>http://127.0.0.1:3000 (Admissions Portal)</span>
-        </div>
-      </div>
-      <div class="iframe-wrapper">
-        <iframe id="portal-frame" src="http://127.0.0.1:3000"></iframe>
-      </div>
+  <main>
+    <!-- Panel A -->
+    <section class="card" aria-labelledby="hA">
+      <h2 id="hA">A · Run overview <span class="pill" id="status-pill">—</span></h2>
+      <dl class="kv" id="overview"></dl>
+      <img id="shot" alt="Latest screenshot of the agent's browser" hidden>
+      <div class="note" id="shot-note">Agent browser view: screenshot taken at each state snapshot.</div>
     </section>
 
-    <!-- RIGHT PANE: PARALLAX Intelligence Dashboard -->
-    <section class="pane-control">
-
-      <!-- Action Controls -->
-      <div class="action-bar">
-        <button class="btn btn-run" id="btn-run-agent" onclick="startWorkflow()">
-          ▶ Run Autonomous Workflow
-        </button>
-        <button class="btn btn-reset" onclick="resetAll()">
-          ⟳ Reset All State
-        </button>
-        <div style="margin-left: auto; font-size: 11px; color: var(--text-muted);">
-          Active Model: <strong style="color:#e2e8f0;">vLLM / Qwen-2.5-Coder-32B (Advisory)</strong>
-        </div>
-      </div>
-
-      <!-- Formal Invariant Enforcement Bar -->
-      <div class="invariants-bar">
-        <div class="inv-chip">
-          <span class="inv-name">INV-1: Network Bound</span>
-          <span class="inv-badge" id="inv-1-status">ACTIVE</span>
-        </div>
-        <div class="inv-chip">
-          <span class="inv-name">INV-2: Secret Scrubbing</span>
-          <span class="inv-badge" id="inv-2-status">ENFORCED</span>
-        </div>
-        <div class="inv-chip">
-          <span class="inv-name">INV-3: Human Gate</span>
-          <span class="inv-badge" id="inv-3-status">ARMED</span>
-        </div>
-        <div class="inv-chip">
-          <span class="inv-name">INV-4: Bound Recovery</span>
-          <span class="inv-badge" id="inv-4-status">READY</span>
-        </div>
-      </div>
-
-      <!-- Interactive Human Approval Prompt -->
-      <div id="approval-region"></div>
-
-      <!-- Body: Timeline + Diagnostics -->
-      <div class="dashboard-body">
-
-        <!-- Column 1: Chronos Event Timeline -->
-        <div class="card">
-          <div class="card-header">
-            <span>CHRONOS Forensic Audit Stream</span>
-            <span id="event-counter" style="color:var(--primary); font-size:10px;">0 Events</span>
-          </div>
-          <div class="timeline-container" id="timeline">
-            <div style="color:var(--text-dim); text-align:center; padding: 40px 10px; font-size: 11px;">
-              Ready. Click <strong>[Run Autonomous Workflow]</strong> above to begin live demonstration.
-            </div>
-          </div>
-        </div>
-
-        <!-- Column 2: GHOST & Cryptography -->
-        <div class="side-stack">
-          <!-- GHOST Engine Hypotheses -->
-          <div class="card side-box">
-            <div class="card-header">
-              <span>GHOST Root Cause Engine</span>
-              <span style="color:#c084fc; font-size:10px;">Bayesian Probing</span>
-            </div>
-            <div style="padding: 12px; flex: 1; overflow-y: auto;" id="ghost-container">
-              <div style="color:var(--text-dim); font-size: 11px; text-align: center; padding: 20px;">
-                No anomalies detected. Target state healthy.
-              </div>
-            </div>
-          </div>
-
-          <!-- Cryptographic SHA-256 State Chain -->
-          <div class="card side-box">
-            <div class="card-header">
-              <span>Cryptographic State Chain</span>
-              <span style="color:#38bdf8; font-size:10px;">SHA-256 Chained</span>
-            </div>
-            <div style="padding: 10px; flex: 1; display:flex; flex-direction:column;">
-              <pre class="crypto-box" id="crypto-log">// Chain initialized. Awaiting run...</pre>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
+    <!-- Panel B -->
+    <section class="card" aria-labelledby="hB">
+      <h2 id="hB">B · Timeline <span>
+        <button id="replay" title="Replay the recorded run">⟲ Replay</button>
+        <button id="replay-stop" disabled>Stop</button>
+      </span></h2>
+      <div class="legend"><span class="g">normal</span><span class="r">failure</span><span class="p">guard blocked / denied</span><span class="a">awaiting approval</span></div>
+      <ul id="timeline" aria-label="Event timeline"></ul>
     </section>
-  </div>
+
+    <!-- Panel D -->
+    <section class="card" aria-labelledby="hD">
+      <h2 id="hD">D · Human approval</h2>
+      <div id="approvals"></div>
+      <h2 style="margin-top:10px">Recent decisions</h2>
+      <div id="decisions"></div>
+    </section>
+
+    <!-- Panel C -->
+    <section class="card" aria-labelledby="hC">
+      <h2 id="hC">C · GHOST hypotheses</h2>
+      <div id="hypotheses"></div>
+      <div class="note">Confidence = S/(S+C+0.25) over evidence weights (probe 0.60, status code 0.25, message 0.15). See src/ghost/prober.ts.</div>
+      <div id="recon" class="recon"></div>
+    </section>
+
+    <!-- Panel E -->
+    <section class="card" aria-labelledby="hE">
+      <h2 id="hE">E · Evidence inspector</h2>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <pre id="inspector" aria-live="polite">Select a timeline event.</pre>
+    </section>
+
+    <!-- Panel F -->
+    <section class="card" aria-labelledby="hF">
+      <h2 id="hF">F · Before / after benchmark</h2>
+      <div id="bench"></div>
+    </section>
+  </main>
 
   <script>
-    let lastRenderedCount = -1;
+  (() => {
+    'use strict';
+    const $ = (id) => document.getElementById(id);
+    const STALE_MS = 10000;
+    const st = { live: null, view: null, mode: 'live', selectedId: null, tab: 'event', lastOk: 0, replayIdx: null, replayTimer: null, es: null, pollTimer: null, fetching: false, again: false };
 
-    async function startWorkflow() {
-      const btn = document.getElementById('btn-run-agent');
-      btn.disabled = true;
-      btn.innerText = '⏳ Executing Live Agent...';
-      await fetch('/api/agent/run', { method: 'POST' });
+    // ---------- safe DOM helpers: every value goes through textContent
+    function h(tag, attrs, ...kids) {
+      const el = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs || {})) {
+        if (v === undefined || v === null || v === false) continue;
+        if (k === 'class') el.className = v; else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else el.setAttribute(k, String(v));
+      }
+      for (const kid of kids.flat()) if (kid !== null && kid !== undefined) el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+      return el;
     }
-
-    async function resetAll() {
-      lastRenderedCount = -1;
-      await fetch('/api/reset', { method: 'POST' });
-      document.getElementById('portal-frame').src = 'http://127.0.0.1:3000';
-      const btn = document.getElementById('btn-run-agent');
-      btn.disabled = false;
-      btn.innerText = '▶ Run Autonomous Workflow';
-      resetStepper();
-      poll();
+    const SECRET_KEY = /password|passwd|token|cookie|authorization|secret|api[_-]?key|session[_-]?(id|token)|(^|[_-])otp($|[_-])|cvv|card[_-]?number/i;
+    function redact(v, depth) {
+      depth = depth || 0;
+      if (depth > 12) return '[TRUNCATED]';
+      if (typeof v === 'string') return v.replace(/\bSES_[A-Z0-9_]+\b/g, '[REDACTED_TOKEN]').replace(/\bBearer\s+\S+/gi, 'Bearer [REDACTED_TOKEN]');
+      if (Array.isArray(v)) return v.map((x) => redact(x, depth + 1));
+      if (v && typeof v === 'object') { const o = {}; for (const [k, x] of Object.entries(v)) o[k] = SECRET_KEY.test(k) && x !== null && typeof x !== 'boolean' ? '[REDACTED]' : redact(x, depth + 1); return o; }
+      return v;
     }
+    const json = (v) => JSON.stringify(redact(v), null, 2);
+    const fmtTime = (t) => (typeof t === 'number' ? new Date(t).toISOString().slice(11, 23) : '—');
+    function banner(kind, text) { const b = $('banner'); b.className = text ? 'show ' + kind : ''; b.textContent = text || ''; }
+    function pill(el, text, color) { el.textContent = text; el.className = 'pill ' + (color || ''); }
 
-    async function approveAction() {
-      await fetch('/api/approve', { method: 'POST' });
-      poll();
+    // ---------- networking
+    async function getJson(url) {
+      const r = await fetch(url, { cache: 'no-store' });
+      let body;
+      try { body = await r.json(); } catch (e) { throw new Error(url + ' returned a non-JSON response (HTTP ' + r.status + ')'); }
+      return { status: r.status, body };
     }
-
-    async function denyAction() {
-      await fetch('/api/reject', { method: 'POST' });
-      poll();
+    async function postJson(url, payload) {
+      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload || {}) });
+      let body = {}; try { body = await r.json(); } catch (e) { body = { error: 'HTTP ' + r.status + ' with a non-JSON body' }; }
+      if (!r.ok) throw new Error(body.error || ('HTTP ' + r.status));
+      return body;
     }
-
-    function resetStepper() {
-      document.querySelectorAll('.step-node').forEach(n => n.className = 'step-node');
-      document.getElementById('step-nav').className = 'step-node active';
+    function validState(s) {
+      return s && typeof s === 'object' && typeof s.status === 'string' && s.view && Array.isArray(s.view.timeline) && Array.isArray(s.view.events) && Array.isArray(s.pendingApprovals);
     }
-
-    async function poll() {
+    async function refresh() {
+      if (st.fetching) { st.again = true; return; }
+      st.fetching = true;
       try {
-        const resp = await fetch('/api/events');
-        const data = await resp.json();
-
-        // 1. Status Chip & Stepper Update
-        const statusEl = document.getElementById('runtime-status');
-        const status = data.status || 'IDLE';
-        statusEl.innerText = status;
-
-        const events = data.events || [];
-        document.getElementById('event-counter').innerText = `${events.length} Events`;
-
-        // Update Steppers based on events
-        const hasThreat = events.some(e => e.type === 'NETWORK_BLOCKED');
-        const hasFailure = events.some(e => e.type === 'FAILURE_DETECTED');
-        const hasApproval = events.some(e => e.type === 'APPROVAL_REQUESTED');
-        const isVerified = events.some(e => e.type === 'POSTCONDITION_VERIFIED');
-
-        if (events.length > 0) document.getElementById('step-nav').className = 'step-node completed';
-        if (hasThreat) document.getElementById('step-threat').className = 'step-node danger';
-        if (hasFailure) document.getElementById('step-failure').className = 'step-node warning';
-        if (hasApproval) {
-          document.getElementById('step-approval').className = data.pendingApproval ? 'step-node active' : 'step-node completed';
-        }
-        if (isVerified) {
-          document.getElementById('step-verify').className = 'step-node completed';
-          const btn = document.getElementById('btn-run-agent');
-          btn.disabled = false;
-          btn.innerText = '✔ Re-run Workflow';
-        }
-
-        // 2. Render Human Approval Banner
-        const appBox = document.getElementById('approval-region');
-        if (data.pendingApproval) {
-          appBox.innerHTML = `
-            <div class="approval-banner">
-              <div class="app-title">⚠️ HUMAN APPROVAL GATE TRIGGERED (INVARIANT INV-3)</div>
-              <div class="app-desc">
-                The agent proposes an irreversible state-changing action: 
-                <strong style="color:#fde047;">${data.pendingApproval.humanLabel}</strong> on selector <code>${data.pendingApproval.target}</code>.<br>
-                Under deterministic safety invariants, irreversible form submissions halt until an operator explicitly approves.
-              </div>
-              <div class="app-buttons">
-                <button class="btn btn-approve" onclick="approveAction()">✔ Approve & Execute Submission</button>
-                <button class="btn btn-deny" onclick="denyAction()">✖ Deny & Abort Action</button>
-              </div>
-            </div>
-          `;
-        } else {
-          appBox.innerHTML = '';
-        }
-
-        // 3. Render GHOST Hypotheses
-        const ghostContainer = document.getElementById('ghost-container');
-        const hypos = data.hypotheses || [];
-        if (hypos.length > 0) {
-          ghostContainer.innerHTML = hypos.map(h => `
-            <div class="hypo-item">
-              <div class="hypo-claim">${h.claim}</div>
-              <div style="display:flex; justify-content:space-between; font-size:10px; color:#cbd5e1;">
-                <span>Category: <strong>${h.category}</strong></span>
-                <span>Confidence: <strong>${(h.confidenceScore * 100).toFixed(0)}%</strong></span>
-              </div>
-              <div class="conf-track">
-                <div class="conf-fill" style="width: ${h.confidenceScore * 100}%;"></div>
-              </div>
-              <div style="font-size:9px; color:#94a3b8; margin-top:6px;">
-                Evidence: ${h.supportingEvidence[0] || 'Detected via interventional probing'}
-              </div>
-            </div>
-          `).join('');
-        }
-
-        // 4. Render Timeline Events (Only update DOM when new events arrive to prevent clipping and scroll resets)
-        if (events.length > 0 && events.length !== lastRenderedCount) {
-          lastRenderedCount = events.length;
-          const timelineHtml = events.slice().reverse().map(e => {
-            let cls = '';
-            let why = '';
-            let title = JSON.stringify(e.payload);
-
-            if (e.type === 'DOM_OBSERVED') {
-              title = `Observed page: <strong>${e.payload.title || e.payload.url}</strong>`;
-              why = `ARIA accessibility tree snapshot extracted. Elements indexed deterministically.`;
-            } else if (e.type === 'ACTION_DISPATCHED') {
-              title = `Agent dispatched: <strong>${e.payload.humanLabel || e.payload.action}</strong>`;
-              why = `Action passed safety predicates and was scheduled on the browser thread.`;
-            } else if (e.type === 'NETWORK_BLOCKED') {
-              cls = 'threat';
-              title = `🛑 EXFILTRATION BLOCKED: Outbound request to <code>${e.payload.targetUrl}</code>`;
-              why = `Deterministic Allowlist violation (INV-1). Attacker prompt injection attempt neutralized.`;
-            } else if (e.type === 'FAILURE_DETECTED') {
-              cls = 'threat';
-              title = `💥 Target Error: <code>${e.payload.error || e.payload.statusCode}</code>`;
-              why = `Triggered state backtracking in CHRONOS to isolate last-good healthy state.`;
-            } else if (e.type === 'HYPOTHESIS_FORMULATED') {
-              cls = 'recovery';
-              title = `🔍 Root Cause Hypothesized: <em>"${e.payload.hypothesis.claim}"</em>`;
-              why = `GHOST isolated the failure mechanism with ${(e.payload.hypothesis.confidenceScore * 100).toFixed(0)}% confidence.`;
-            } else if (e.type === 'RECOVERY_PROPOSED') {
-              cls = 'recovery';
-              title = `MIRROR Plan: <strong>${e.payload.strategy}</strong>`;
-              why = `Ranked candidate utility: ${e.payload.utilityScore}. Pre-flight invariant checks passed.`;
-            } else if (e.type === 'APPROVAL_REQUESTED') {
-              cls = 'approval';
-              title = `⚠️ Approval Gate: Halted before <strong>${e.payload.humanLabel}</strong>`;
-              why = `State-changing action requires human operator cryptographic consent (INV-3).`;
-            } else if (e.type === 'APPROVAL_GRANTED') {
-              cls = 'verified';
-              title = `✔ Operator Approved: Resuming workflow submission`;
-              why = `Human consent logged into immutable policy ledger.`;
-            } else if (e.type === 'POSTCONDITION_VERIFIED') {
-              cls = 'verified';
-              title = `✔ POSTCONDITION VERIFIED: Application accepted on target backend!`;
-              why = `Runtime Verifier queried database: Record exists, status 'ACCEPTED', 100% tests passed.`;
-            }
-
-            return `
-              <div class="event-card ${cls}">
-                <div class="event-meta">
-                  <span class="event-tag">${e.actor} // ${e.type}</span>
-                  <span>${new Date(e.timestamp).toISOString().split('T')[1].replace('Z','')}</span>
-                </div>
-                <div class="event-title">${title}</div>
-                <div class="event-why">💡 <strong>Why:</strong> ${why}</div>
-              </div>
-            `;
-          }).join('');
-
-          document.getElementById('timeline').innerHTML = timelineHtml;
-        } else if (events.length === 0 && lastRenderedCount !== 0) {
-          lastRenderedCount = 0;
-          document.getElementById('timeline').innerHTML = `
-            <div style="color:var(--text-dim); text-align:center; padding: 40px 10px; font-size: 11px;">
-              Ready. Click <strong>[Run Autonomous Workflow]</strong> above to begin live demonstration.
-            </div>
-          `;
-        }
-
-          // 5. Update Cryptographic State Hash
-          const latest = events[events.length - 1];
-          document.getElementById('crypto-log').innerText = JSON.stringify({
-            runId: latest.runId,
-            currentHash: latest.hash,
-            previousHash: latest.previousHash || "00000000000000000000000000000000",
-            totalEvents: events.length,
-            chainIntegrity: "CRYPTOGRAPHICALLY_VERIFIED",
-            formalInvariants: {
-              "INV-1_NetworkBoundary": "PASS",
-              "INV-2_SecretIsolation": "PASS",
-              "INV-3_StateMutationGate": "PASS",
-              "INV-4_UncertaintyBound": "PASS"
-            }
-          }, null, 2);
-        }
-      } catch (err) {}
+        const { body } = await getJson('/api/state');
+        if (!validState(body)) throw new Error('Invalid /api/state response shape.');
+        st.live = body; st.lastOk = Date.now();
+        if (st.mode === 'live') st.view = body.view;
+        banner('', '');
+        render();
+      } catch (e) {
+        banner('err', 'Backend error: ' + e.message);
+      } finally {
+        st.fetching = false;
+        if (st.again) { st.again = false; refresh(); }
+      }
+    }
+    function connect() {
+      if (st.es) st.es.close();
+      const es = new EventSource('/api/stream');
+      st.es = es;
+      es.addEventListener('update', () => { pill($('conn'), 'live (SSE)', 'green'); stopPolling(); refresh(); });
+      es.onerror = () => { pill($('conn'), 'reconnecting…', 'amber'); startPolling(); };
+    }
+    function startPolling() { if (!st.pollTimer) st.pollTimer = setInterval(refresh, 3000); }
+    function stopPolling() { if (st.pollTimer) { clearInterval(st.pollTimer); st.pollTimer = null; } }
+    setInterval(() => {
+      if (st.lastOk && Date.now() - st.lastOk > STALE_MS) { pill($('conn'), 'disconnected', 'red'); banner('warn', 'Data is stale: no successful update for ' + Math.round((Date.now() - st.lastOk) / 1000) + 's. Showing last known state.'); }
+    }, 2000);
+    async function checkPortal() {
+      try { const { body } = await getJson('/api/portal/health'); pill($('portal'), body.reachable ? 'portal up' : 'portal down', body.reachable ? 'green' : 'red'); }
+      catch (e) { pill($('portal'), 'portal ?', 'red'); }
     }
 
-    setInterval(poll, 750);
-    poll();
+    // ---------- render
+    function render() {
+      const live = st.live, view = st.view;
+      if (!live || !view) return;
+      const busy = ['STARTING', 'RUNNING', 'AWAITING_APPROVAL', 'DIAGNOSING', 'RECOVERING', 'VERIFYING'].includes(live.status);
+      $('start').disabled = busy || st.mode !== 'live'; $('abort').disabled = !busy || st.mode !== 'live';
+      renderOverview(live, view); renderTimeline(view); renderApprovals(live, view); renderHypotheses(view); renderInspector(view);
+    }
+    function statusColor(s) { return { VERIFIED: 'green', COMPLETED: 'green', FAILED: 'red', ABORTED: 'red', AWAITING_APPROVAL: 'amber', DIAGNOSING: 'purple', RECOVERING: 'purple' }[s] || 'blue'; }
+    function renderOverview(live, view) {
+      const isLive = st.mode === 'live';
+      pill($('status-pill'), isLive ? live.status : 'REPLAY', isLive ? statusColor(live.status) : 'blue');
+      const rows = isLive ? [
+        ['Run ID', live.runId || '— (no run yet)'], ['Scenario', live.scenario || '—'], ['Status', live.status], ['Phase', live.phase],
+        ['Portal step', live.step ?? '—'], ['Browser', live.browser], ['Latest event', fmtTime(view.latestEventAt)], ['Events', view.eventCount],
+        ['Hash chain', view.chainValid === null ? 'n/a' : view.chainValid ? 'valid' : 'BROKEN'], ['Outcome', live.outcomeSummary || '—'], ['Error', live.error || '—']
+      ] : [['Run ID', view.runId], ['Mode', 'Persisted run (JSONL) replayed through CHRONOS'], ['Events', view.eventCount], ['Latest event', fmtTime(view.latestEventAt)], ['Hash chain', view.chainValid === null ? 'not checked (malformed lines)' : view.chainValid ? 'valid' : 'BROKEN']];
+      if (isLive && live.invariantAudit) rows.push(['Invariant audit', live.invariantAudit.passedChecks + '/' + live.invariantAudit.totalChecks + ' checks passed']);
+      $('overview').replaceChildren(...rows.flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, String(v))]));
+      const shot = $('shot');
+      if (isLive && live.hasScreenshot) { shot.hidden = false; shot.src = '/api/screenshot?seq=' + live.seq; } else { shot.hidden = true; }
+    }
+    function renderTimeline(view) {
+      const ul = $('timeline');
+      if (view.timeline.length === 0) { ul.replaceChildren(h('li', { class: 'empty' }, 'No events yet. Start a run.')); return; }
+      const atBottom = ul.scrollTop + ul.clientHeight >= ul.scrollHeight - 30;
+      ul.replaceChildren(...view.timeline.map((t, i) => h('li', {
+        class: 'c-' + t.category + (t.id === st.selectedId ? ' sel' : '') + (st.replayIdx !== null && i > st.replayIdx ? ' future' : ''),
+        tabindex: 0, 'data-event-id': t.id, 'data-category': t.category, role: 'button',
+        onclick: () => select(t.id), onkeydown: (e) => { if (e.key === 'Enter') select(t.id); }
+      }, h('span', { class: 'dot' }), h('span', { class: 't-time' }, fmtTime(t.timestamp)),
+        h('span', {}, h('span', { class: 't-type' }, t.type + ' · ' + t.actor), ' ', h('span', { class: 't-meta' }, t.id + (t.hasEvidence ? ' · evidence' : '')), h('br'), h('span', { class: 't-sum' }, t.summary)))));
+      if (st.replayIdx !== null) { const cur = ul.children[st.replayIdx]; if (cur) cur.scrollIntoView({ block: 'nearest' }); }
+      else if (atBottom) ul.scrollTop = ul.scrollHeight;
+    }
+    function select(id) { st.selectedId = id; st.tab = 'event'; render(); }
+
+    function factsTable(dom) {
+      if (!dom) return h('div', { class: 'empty' }, 'No DOM facts (non-element action).');
+      return h('table', { class: 'facts' }, Object.entries(dom).map(([k, v]) => h('tr', {}, h('td', {}, k), h('td', {}, String(v)))));
+    }
+    function renderApprovals(live, view) {
+      const box = $('approvals');
+      const pending = st.mode === 'live' ? live.pendingApprovals : [];
+      if (pending.length === 0) box.replaceChildren(h('div', { class: 'empty' }, st.mode === 'live' ? 'No action is waiting for approval.' : 'Replay mode: approvals are read-only history.'));
+      else box.replaceChildren(...pending.map((a) => h('div', { class: 'approval', 'data-approval-id': a.id },
+        h('div', {}, h('span', { class: 'pill amber' }, a.guardStatus), ' ', h('b', {}, a.actionType), ' on ', h('code', {}, a.target)),
+        h('div', { class: 't-sum' }, 'Agent says: "' + a.agentLabel + '" (untrusted label)'),
+        a.dom && a.dom.text ? h('div', {}, 'Element actually reads: ', h('b', {}, '"' + a.dom.text + '"')) : null,
+        a.elementScreenshot && a.elementScreenshot.startsWith('data:image/png;base64,') ? h('img', { src: a.elementScreenshot, alt: 'Screenshot of the target element' }) : h('div', { class: 'empty' }, 'Element screenshot unavailable.'),
+        factsTable(a.dom),
+        h('div', {}, 'Guard: ', h('b', {}, a.violatedRule || ''), ' · risk ', a.riskLevel), h('div', { class: 't-sum' }, a.guardReason),
+        h('div', { class: 'controls', style: 'margin-top:8px' },
+          h('button', { class: 'ok', onclick: (e) => decide(a.id, 'APPROVE', e.target) }, '✔ Approve'),
+          h('button', { class: 'bad', onclick: (e) => decide(a.id, 'DENY', e.target) }, '✖ Deny')),
+        h('div', { class: 'note' }, 'Approval covers this exact element. The action is re-read and re-checked by the guard before it runs.'))));
+      const dec = view.approvalsResolved.slice(-6).reverse();
+      $('decisions').replaceChildren(...(dec.length ? dec.map((d) => h('div', { class: 't-sum' }, h('span', { class: 'pill ' + (d.type === 'APPROVAL_GRANTED' ? 'green' : 'purple') }, d.type === 'APPROVAL_GRANTED' ? 'approved' : 'denied'), ' ', d.payload.actionId || '', ' by ', d.payload.operator || '?')) : [h('div', { class: 'empty' }, 'None yet.')]));
+    }
+    async function decide(id, decision, btn) {
+      for (const b of btn.parentElement.querySelectorAll('button')) b.disabled = true;
+      try { await postJson('/api/approvals/' + encodeURIComponent(id), { decision }); }
+      catch (e) { banner('err', 'Approval call failed: ' + e.message); for (const b of btn.parentElement.querySelectorAll('button')) b.disabled = false; }
+      refresh();
+    }
+
+    function renderHypotheses(view) {
+      const box = $('hypotheses');
+      if (view.hypotheses.length === 0) { box.replaceChildren(h('div', { class: 'empty' }, 'No failure diagnosed in this run.')); }
+      else box.replaceChildren(...view.hypotheses.map(({ hypothesis: hy, failureEventId }) => {
+        const c = typeof hy.confidenceScore === 'number' ? hy.confidenceScore : null;
+        const color = { CONFIRMED: 'green', REFUTED: 'red', INCONCLUSIVE: 'amber', PROPOSED: 'blue' }[hy.status] || '';
+        const exp = hy.experiment || {}, res = hy.experimentResult || {};
+        return h('div', { class: 'hyp', 'data-hypothesis-status': hy.status },
+          h('div', {}, h('span', { class: 'pill ' + color }, hy.status), ' ', h('b', {}, hy.claim)),
+          h('div', { class: 't-meta' }, 'failure ' + failureEventId + ' · ' + (hy.scoring || '')),
+          h('div', { class: 'bar' }, h('div', { style: 'width:' + Math.round((c || 0) * 100) + '%' })),
+          h('div', {}, 'Confidence: ', h('b', { 'data-confidence': c }, c === null ? 'n/a' : c.toFixed(2))),
+          h('div', { class: 'sup' }, 'Supporting:'), h('ul', {}, (hy.supportingEvidence || []).map((e) => h('li', { class: 'sup' }, e))),
+          h('div', { class: 'con' }, 'Contradicting:'), h('ul', {}, (hy.contradictoryEvidence || []).map((e) => h('li', { class: 'con' }, e))),
+          h('div', {}, 'Probe: ', exp.name || '—', ' (', exp.method || '', ' ', exp.target || '', ', read-only)'),
+          h('div', { class: 't-sum' }, 'Probe result: ', (res.outcome || '—') + ' ' + JSON.stringify(redact(res.observed || {}))));
+      }));
+      const rc = $('recon');
+      const recs = view.reconstructions || [];
+      rc.replaceChildren(...recs.map((r) => h('div', {},
+        h('h3', {}, 'CHRONOS · last good state: ' + (r.lastGood.status === 'FOUND' ? r.lastGood.record.eventId + ' ("' + r.lastGood.record.label + '")' : 'UNAVAILABLE — ' + r.lastGood.reason)),
+        h('div', { class: 't-meta' }, 'Observed (facts from recorded events):'), h('ul', {}, r.observations.map((o) => h('li', {}, o))),
+        h('div', { class: 't-meta' }, 'Inferred (associations, not established causes):'), h('ul', {}, r.inferences.map((o) => h('li', {}, o))))));
+    }
+
+    const TABS = [['event', 'Selected event'], ['snapshots', 'State snapshots'], ['diffs', 'State diffs'], ['network', 'Network'], ['hypotheses', 'Hypotheses'], ['policy', 'Policy decisions'], ['plans', 'Recovery & verification']];
+    function renderInspector(view) {
+      $('tabs').replaceChildren(...TABS.map(([id, label]) => h('button', { role: 'tab', 'aria-selected': String(st.tab === id), 'data-tab': id, onclick: () => { st.tab = id; render(); } }, label)));
+      let data;
+      switch (st.tab) {
+        case 'event': data = view.events.find((e) => e.id === st.selectedId) || 'Select a timeline event.'; break;
+        case 'snapshots': data = view.events.filter((e) => e.type === 'DOM_OBSERVED' && e.payload.kind === 'STATE_SNAPSHOT').map((e) => ({ eventId: e.id, ...e.payload })); break;
+        case 'diffs': data = (view.reconstructions || []).map((r) => ({ failure: r.failure, lastGood: r.lastGood, diff: r.diff })); break;
+        case 'network': data = view.networkEvents; break;
+        case 'hypotheses': data = { hypotheses: view.hypotheses, probes: view.probes }; break;
+        case 'policy': data = view.policyDecisions; break;
+        case 'plans': data = { plans: view.plans, verification: view.verification, minimizations: st.live ? st.live.minimizations : [] }; break;
+      }
+      $('inspector').textContent = typeof data === 'string' ? data : (Array.isArray(data) && data.length === 0 ? '(empty)' : json(data));
+    }
+
+    async function renderBench() {
+      const box = $('bench');
+      try {
+        const { body } = await getJson('/api/benchmark');
+        if (!body || body.available !== true) { box.replaceChildren(h('div', { class: 'empty', 'data-bench': 'unavailable' }, 'Benchmark unavailable: ' + (body && body.reason ? body.reason : 'invalid response') + ' (' + (body && body.source) + ')')); return; }
+        const a = body.report.attacks, b = body.report.benign;
+        const row = (label, before, after) => [h('div', {}, label), h('div', { class: 'num' }, String(before)), h('div', { class: 'num', 'data-bench-after': label }, String(after))];
+        box.replaceChildren(
+          h('div', { class: 'bench', 'data-bench': 'available' },
+            h('div', { class: 'h' }, ''), h('div', { class: 'h' }, 'Agent alone'), h('div', { class: 'h' }, '+ PARALLAX'),
+            ...row('Harmful actions that ran (of ' + a.total + ')', a.executedBefore, a.executedAfter),
+            ...row('Blocked outright', 0, a.blockedAfter), ...row('Paused for approval', 0, a.gatedAfter),
+            ...row('Normal steps run freely (of ' + b.total + ')', b.total, b.executedAfter), ...row('Normal steps wrongly blocked', 0, b.blockedAfter)),
+          h('div', { class: 'note' }, 'Source: ' + body.source + ' (generated ' + new Date(body.modifiedAt).toISOString() + '). Measures outcomes once a model is already fooled; not a detection rate.'));
+      } catch (e) { box.replaceChildren(h('div', { class: 'empty', 'data-bench': 'unavailable' }, 'Benchmark unavailable: ' + e.message)); }
+    }
+
+    async function loadRuns() {
+      try {
+        const { body } = await getJson('/api/runs');
+        const sel = $('runs'), cur = sel.value;
+        sel.replaceChildren(h('option', { value: 'live' }, 'Live / latest run'), ...body.runs.map((r) => h('option', { value: r.runId }, r.runId)));
+        sel.value = [...sel.options].some((o) => o.value === cur) ? cur : 'live';
+      } catch (e) { banner('err', 'Could not list runs: ' + e.message); }
+    }
+    $('runs').addEventListener('change', async () => {
+      const id = $('runs').value;
+      stopReplay();
+      if (id === 'live') { st.mode = 'live'; st.view = st.live ? st.live.view : null; render(); return; }
+      try {
+        const { status, body } = await getJson('/api/runs/' + encodeURIComponent(id));
+        if (status !== 200 || !body.view) throw new Error(body.error || ('HTTP ' + status));
+        st.mode = 'replay'; st.view = body.view; st.selectedId = null; render();
+        if (body.rejected && body.rejected.length) banner('warn', body.rejected.length + ' malformed record(s) skipped while reading this run.');
+      } catch (e) { banner('err', 'Could not load run: ' + e.message); }
+    });
+
+    function stopReplay() { if (st.replayTimer) clearInterval(st.replayTimer); st.replayTimer = null; st.replayIdx = null; $('replay-stop').disabled = true; render(); }
+    $('replay').addEventListener('click', () => {
+      if (!st.view || st.view.timeline.length === 0) return;
+      stopReplay();
+      st.replayIdx = 0; $('replay-stop').disabled = false;
+      st.selectedId = st.view.timeline[0].id; render();
+      st.replayTimer = setInterval(() => {
+        if (st.replayIdx >= st.view.timeline.length - 1) { clearInterval(st.replayTimer); st.replayTimer = null; $('replay-stop').disabled = true; return; }
+        st.replayIdx += 1; st.selectedId = st.view.timeline[st.replayIdx].id; render();
+      }, 350);
+    });
+    $('replay-stop').addEventListener('click', stopReplay);
+
+    $('start').addEventListener('click', async () => {
+      $('start').disabled = true;
+      try { await postJson('/api/runs', { scenario: $('scenario').value }); st.mode = 'live'; $('runs').value = 'live'; st.selectedId = null; stopReplay(); }
+      catch (e) { banner('err', 'Could not start run: ' + e.message); }
+      refresh(); setTimeout(loadRuns, 1500);
+    });
+    $('abort').addEventListener('click', async () => { try { await postJson('/api/runs/abort', {}); } catch (e) { banner('err', 'Abort failed: ' + e.message); } refresh(); });
+
+    (async function init() {
+      try {
+        const { body } = await getJson('/api/state');
+        $('scenario').replaceChildren(...(body.scenarios || []).map((s) => h('option', { value: s }, s)));
+      } catch (e) { banner('err', 'Backend unreachable: ' + e.message); }
+      connect(); refresh(); renderBench(); loadRuns(); checkPortal(); setInterval(checkPortal, 10000);
+    })();
+  })();
   </script>
 </body>
 </html>

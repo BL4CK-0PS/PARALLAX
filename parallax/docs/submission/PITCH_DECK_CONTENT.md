@@ -39,7 +39,7 @@ Members: Kishanth R (Lead), Dharshan S. USNs: **TODO, fill in your college regis
 Demo order (core feature first): injection blocked → Final Submit waits for approval → session expiry diagnosed → replay.
 
 ### Slide 4: Tech stack
-Playwright + Chromium · Node.js 22+ with native TypeScript type-stripping · open-weights model on vLLM (2× L40S, proposals only) · append-only JSONL + SHA-256 · HTML/JS dashboard · `node:test`.
+Playwright + Chromium · Node.js 22+ with native TypeScript type-stripping · open-weights model on vLLM (2× L40S, proposals only; planned, the demo runs a scripted agent through the same guard) · append-only JSONL + SHA-256 · HTML/JS dashboard · `node:test`.
 Don't put version numbers on the slide unless that version is actually installed.
 
 ### Slide 5: Architecture

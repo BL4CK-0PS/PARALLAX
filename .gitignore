@@ -8,3 +8,8 @@ dist/
 *.log
 .DS_Store
 .clawness/
+
+# personal event tickets (name, email, QR pass code), never commit
+*ticket*.png
+*ticket*.jp*g
+WhatsApp Image*

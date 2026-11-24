@@ -27,7 +27,7 @@
   table { width:100%; border-collapse: collapse; background:#fff; border:2px solid var(--ink); border-radius:12px; overflow:hidden; }
   th { background: var(--navy); color:#fff; text-align:left; padding:10px 12px; font-size:14px; }
   th.after { background: var(--rust); }
-  td { padding:9px 12px; border-top:1px solid #e5ddd0; font-size:15px; vertical-align: top; }
+  td { padding:9px 12px; border-top:1px solid #e5ddd0; font-size:15px; vertical-align: top; overflow-wrap:anywhere; }
   tr.pending td { opacity:.35; }
   tr.benign td:first-child::after { content:" · normal step"; color: var(--grey); font-size:12px; }
   th:nth-child(2), td:nth-child(2) { width: 150px; white-space: nowrap; }
@@ -46,6 +46,7 @@
   .verdict { margin-top:12px; min-height: 48px; font-size:14px; }
   footer { margin-top: 30px; color: var(--grey); font-size: 13px; }
   @media (max-width: 900px) { .score, .try { grid-template-columns: 1fr; } main, header { padding-left:18px; padding-right:18px; } }
+  @media (max-width: 520px) { th, td { padding:8px 6px; font-size:13px; } th:nth-child(2), td:nth-child(2) { width:auto; white-space:normal; } }
 </style>
 </head>
 <body>

@@ -24,7 +24,7 @@
     section.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; min-width:0; }
     section.card h2 { font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:6px; }
     .span2 { grid-column:span 2; } @media (max-width:800px) { .span2 { grid-column:span 1; } }
-    dl.kv { display:grid; grid-template-columns:130px 1fr; gap:3px 8px; } dl.kv dt { color:var(--dim); } dl.kv dd { word-break:break-all; }
+    dl.kv { display:grid; grid-template-columns:130px 1fr; gap:3px 8px; } dl.kv dt { color:var(--dim); } dl.kv dd { overflow-wrap:anywhere; }
     .empty { color:var(--dim); font-style:italic; padding:6px 0; }
     #shot { width:100%; border:1px solid var(--border); border-radius:6px; margin-top:8px; background:#fff; min-height:40px; }
     #timeline { list-style:none; max-height:560px; overflow:auto; }

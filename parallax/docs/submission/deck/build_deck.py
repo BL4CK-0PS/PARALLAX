@@ -259,8 +259,8 @@ for i, t in enumerate(flow):
     text(s, 7.92, y, 4.55, 0.46, [t], size=13, anchor=MSO_ANCHOR.MIDDLE, label="Flow step")
 
 card(s, 0.7, 6.42, 11.9, 0.5, fill=NAVY, glow=False, label="MVP strip")
-text(s, 0.9, 6.42, 11.5, 0.5, [[("24-HR MVP  ", {"bold": True, "color": ORANGE}),
-                                ("Synthetic scholarship portal · 3 injectable failures · prompt-injection trap · guard · replay + approval dashboard", {"color": WHITE})]],
+text(s, 0.9, 6.42, 11.5, 0.5, [[("BUILT & TESTED  ", {"bold": True, "color": ORANGE}),
+                                ("Synthetic portal · 3 injectable failures · injection trap · guard · replay + approvals · 127 tests pass", {"color": WHITE})]],
      size=13, anchor=MSO_ANCHOR.MIDDLE, label="MVP text")
 
 s.notes_slide.notes_text_frame.text = (
@@ -276,7 +276,7 @@ set_subtitle(s, "Open-source, self-hosted stack: no page content or credentials 
 stack = [
     ("BROWSER LAYER", "Playwright · Chromium", "ARIA snapshots give a compact, stable page view; CDP routing lets us block requests below the model."),
     ("BACKEND / ENGINES", "Node.js 22 · TypeScript", "One typed language for engines, guard and demo server; native type-stripping, no build step."),
-    ("AI / ML", "Qwen2.5-Coder-32B on vLLM", "Open weights served on our 2× NVIDIA L40S. The LLM only proposes; it has no execution authority."),
+    ("AI / ML", "Qwen2.5-Coder-32B on vLLM (next)", "Pluggable proposer on our 2× L40S. Today a scripted agent runs through the same guard; the LLM never executes."),
     ("DATA / AUDIT", "Append-only JSONL · SHA-256", "Every event hashed and timestamped: replayable, tamper-evident and easy to diff."),
     ("FRONTEND", "HTML/JS dashboard on Node", "Timeline replay, hypothesis board and the approval button; light enough to finish in 24 hrs."),
     ("TESTING", "node:test · Playwright", "Security suite proves exfil requests are aborted, risky clicks gated and secrets redacted."),
@@ -297,7 +297,7 @@ set_subtitle(s, "The LLM proposes; deterministic code disposes; every step is lo
 rows = [
     ("INPUT", [("Target web app", "Scholarship portal"), ("Playwright observer", "ARIA · CDP events"),
                ("Network allowlist", "CDP routing · fail-closed"), ("Event store", "JSONL · SHA-256")]),
-    ("PROCESS", [("MIRROR", "Simulate & rank fixes"), ("LLM (proposals)", "Qwen on vLLM · 2×L40S"),
+    ("PROCESS", [("MIRROR", "Simulate & rank fixes"), ("LLM (proposals)", "Qwen on vLLM · planned"),
                  ("GHOST", "Safe micro-probes"), ("CHRONOS", "State diff · last-good")]),
     ("OUTPUT", [("Policy engine", "TypeScript rules"), ("Human gate", "Approve in dashboard"),
                 ("Executor", "Playwright actions"), ("Verifier", "Backend postconditions"), ("Timeline UI", "Replay & audit")]),
@@ -425,7 +425,7 @@ yb, bh3 = 5.1, 1.78
 card(s, 0.7, yb, hw, bh3, label="Feasibility card")
 text(s, 0.9, yb + 0.12, hw - 0.4, bh3 - 0.2, [
     [("FEASIBILITY", {"bold": True, "color": RUST, "size": 13})],
-    {"runs": [("Technical: ", {"bold": True}), ("policy guard + tests already in our repo; Playwright and vLLM are mature.", {})], "bullet": True},
+    {"runs": [("Technical: ", {"bold": True}), ("working prototype in our repo, 127 tests pass; Playwright is mature.", {})], "bullet": True},
     {"runs": [("Time: ", {"bold": True}), ("frozen scope (1 portal, 3 failures), 2 owners.", {})], "bullet": True},
     {"runs": [("Cost: ", {"bold": True}), ("₹0 licences or API fees; runs on our own 2× L40S.", {})], "bullet": True},
 ], size=13, space=3, label="Feasibility text")

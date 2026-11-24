@@ -29,7 +29,7 @@
   "author": "BL4CK_0P$",
   "license": "MIT",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.6.0"
   },
   "dependencies": {
     "playwright": "^1.65.1"

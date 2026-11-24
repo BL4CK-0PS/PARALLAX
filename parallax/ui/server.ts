@@ -102,8 +102,10 @@ export class CommandCenterUI {
       this.server.once('error', reject);
       this.server.listen(this.port, '127.0.0.1', () => {
         this.heartbeat = setInterval(() => {
-          for (const c of this.sseClients) c.write(': keep-alive\n\n');
-        }, 15_000);
+          // A named event (not an SSE comment) so the page can tell "quiet" from "dead";
+          // must stay well under the page's 10 s staleness window.
+          for (const c of this.sseClients) c.write(`event: ping\ndata: ${JSON.stringify({ seq: this.seq })}\n\n`);
+        }, 4_000);
         resolve();
       });
     });

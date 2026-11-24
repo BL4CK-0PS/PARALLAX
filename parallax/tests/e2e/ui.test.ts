@@ -116,6 +116,16 @@ describe('Command Center dashboard (real browser against real backend)', () => {
     await page.selectOption('#runs', 'live');
   });
 
+  test('a quiet run waiting for a human is not reported as disconnected', async () => {
+    await startRun('normal');
+    await page.locator('.approval').first().waitFor({ timeout: 30_000 });
+    await page.waitForTimeout(13_000); // longer than the 10 s staleness window, with no state changes
+    assert.strictEqual(await page.textContent('#conn'), 'live (SSE)');
+    assert.doesNotMatch((await page.textContent('#banner')) ?? '', /stale/i);
+    await decide('Deny');
+    await waitStatus(['COMPLETED', 'VERIFIED', 'FAILED']);
+  });
+
   test('missing benchmark file renders an explicit unavailable state', async () => {
     fs.renameSync(benchPath, `${benchPath}.bak`);
     await page.reload();

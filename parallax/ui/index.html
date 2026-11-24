@@ -185,6 +185,13 @@
       const es = new EventSource('/api/stream');
       st.es = es;
       es.addEventListener('update', () => { pill($('conn'), 'live (SSE)', 'green'); stopPolling(); refresh(); });
+      // Heartbeat: nothing changed, but the backend is alive, so the shown state is current.
+      es.addEventListener('ping', (ev) => {
+        const seq = JSON.parse(ev.data).seq;
+        st.lastOk = Date.now(); pill($('conn'), 'live (SSE)', 'green'); stopPolling();
+        if (st.live && st.live.seq !== seq) refresh(); // missed an update: catch up
+        else if (/stale/i.test($('banner').textContent)) banner('', '');
+      });
       es.onerror = () => { pill($('conn'), 'reconnecting…', 'amber'); startPolling(); };
     }
     function startPolling() { if (!st.pollTimer) st.pollTimer = setInterval(refresh, 3000); }

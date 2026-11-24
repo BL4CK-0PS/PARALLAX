@@ -183,7 +183,8 @@ The pitch now leads with **Guard** and a measured before/after. These items make
 ### Submission checklist (internal deadline 24 Nov, 20:00 IST; official 23:59 IST)
 - [ ] USNs (register numbers) on deck slide 1, then rebuild: `python parallax/docs/submission/deck/build_deck.py given/wHACKiest26_ppt.pptx BL4CK_0P_Track2.pptx`
 - [ ] Deck on Google Drive, "Anyone with the link can view", opened in a logged-out browser
-- [ ] GitHub repo public; `given/ticket-whackiest.png` NOT committed; no `.env`
-- [ ] `npm test` and `npm run eval` green on a fresh clone
-- [ ] YouTube video unlisted, 3–5 min, plays logged-out
+- [x] GitHub repo public; no `.env`; ticket images removed from the tree and git-ignored (24 Nov). The first ticket is still in history at `592ad40` unless history is rewritten.
+- [x] `npm test` and `npm run eval` green on a fresh clone (24 Nov: 88/88, 14/14 → 0/14; `npm run test:e2e` 39/39)
+- [x] Video recorded: real full-demo run with captions, 3:15 (`Downloads/PARALLAX_demo.webm`, not in the repo)
+- [ ] Video on YouTube, unlisted, plays logged-out
 - [ ] All three links pasted into Devnovate and submitted. Screenshot the confirmation.
